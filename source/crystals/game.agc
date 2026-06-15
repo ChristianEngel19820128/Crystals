@@ -402,7 +402,7 @@ function GameDo(Game ref as TGame)
 							endif
 							ExplosionReset(Game.Explosion,Game.Time.RealNow)
 							Game.IsFieldExploding = TRUE
-							SoundPlay(Game.ExplodeSoundID)
+							SoundPlayPitched(Game.ExplodeSoundID,1+Game.Cascade*0.1)
 							Game.Cascade = Game.Cascade +1
 							if Game.Cascade > 1
 								ColorSet(Color,0,0,0,255)
@@ -413,13 +413,14 @@ function GameDo(Game ref as TGame)
 								SetTextColor(Game.TxtCollectedScore,Color.Red,Color.Green,Color.Blue,Color.Alpha)
 							endif
 							Game.CollectedScore = Game.CollectedScore * Game.Cascade + 0.1 * (GemCount*Game.Level)^2 * Game.Cascade
-							SoundPlayPitched(Game.ScoreSoundID,1+Game.Cascade*0.1)
+							
 						else
 						
 								if Game.Cascade > Game.HighestCascade
 									Game.HighestCascade = Game.Cascade
 								endif
 								
+								SoundPlay(Game.ScoreSoundID)
 								Game.Cascade = 0
 								Game.AbsoluteScore = Game.AbsoluteScore + Game.CollectedScore
 								Game.CollectedScore = 0
