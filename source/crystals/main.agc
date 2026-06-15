@@ -91,4 +91,4 @@ repeat
 	
 	Swap()
 	
-until CheckInputBackStatePressed(Game.JoystickIndex) and Game.IsHighScore = TRUE
+until GetESCPressed() = 1 and Game.IsHighScore = TRUE
