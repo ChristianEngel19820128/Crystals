@@ -24,7 +24,7 @@
 #constant RAINBOWINDEX 9
 #constant MAGICINDEX 8
 
-#constant REACTIONTIME 80
+#constant REACTIONTIME 100
 #constant ANIMATINGTIMEOUT 250
 
 //----------------------------------------------------------------------
