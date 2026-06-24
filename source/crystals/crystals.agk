@@ -77,17 +77,18 @@ FILE_22=workflow.agc;-1
 FILE_NAME_0=0;base64.agc;66;0
 FILE_NAME_1=0;block.agc;146;1
 FILE_NAME_2=0;controls.agc;50;2
-FILE_NAME_3=1;def_game.agc;26;3
+FILE_NAME_3=0;def_game.agc;26;3
 FILE_NAME_4=0;def_joypad.agc;30;4
-FILE_NAME_5=0;game.agc;410;5
-FILE_NAME_6=0;input.agc;110;6
-FILE_NAME_7=0;main.agc;93;7
-FILE_NAME_8=0;sound.agc;57;8
-FILE_NAME_9=0;workflow.agc;189;9
+FILE_NAME_5=0;file.agc;11;5
+FILE_NAME_6=0;game.agc;410;6
+FILE_NAME_7=0;input.agc;110;7
+FILE_NAME_8=0;main.agc;80;8
+FILE_NAME_9=0;sound.agc;57;9
+FILE_NAME_10=0;workflow.agc;189;10
 
 [watchvariables]
 watch_variable=@Version;
 
 [project]
-unfolded=1
+unfolded=0
 

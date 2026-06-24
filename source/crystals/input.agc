@@ -162,7 +162,7 @@ function CheckInputActionAlternateStatePressed(JoystickIndex as integer)
 	endif
 
 	//if GetDeviceBaseName() = "windows"
-		if GetRawKeyPressed(KEY_UP) = 1
+		if GetRawKeyPressed(KEY_W) = 1 or GetRawKeyPressed(KEY_UP) = 1
 			Value = TRUE
 		endif
 	//endif
