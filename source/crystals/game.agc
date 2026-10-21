@@ -284,8 +284,10 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 	Game.SoundVol = 80
 	Game.MusicVol = 50
 
-	SetMusicVolumeOGG(Game.TitleThemeID,Game.MusicVol)
-	PlayMusicOGG(Game.TitleThemeID,1)
+	if Game.TitleThemeID > 0
+		SetMusicVolumeOGG(Game.TitleThemeID,Game.MusicVol)
+		PlayMusicOGG(Game.TitleThemeID,1)
+	endif
 
 	Game.TextSound = CreateText(OUTPUT_SOUND)
 	SetTextPosition(Game.TextSound,fcx,fcy-200)
