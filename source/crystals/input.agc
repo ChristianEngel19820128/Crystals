@@ -229,6 +229,57 @@ function GameInputDo(Game ref as TGame,Now as integer)
 		endif
 	endif
 	
+	if Game.IsPause = TRUE
+	
+		if CheckInputLeftStateDown(Game.JoystickIndex,Game.InputTimer,Game.Time) = TRUE
+			// sound leiser
+			if Game.SelectSound = 0
+				if Game.SoundVol > 0
+					Game.SoundVol = Game.SoundVol - 10
+				endif
+			else
+				if Game.MusicVol > 0
+					Game.MusicVol = Game.MusicVol - 10
+					SetMusicVolumeOGG(Game.TitleThemeID,Game.MusicVol)
+				endif
+			endif
+		endif
+
+		if CheckInputRightStateDown(Game.JoystickIndex,Game.InputTimer,Game.Time) = TRUE
+			// sound lauter
+			if Game.SelectSound = 0
+				if Game.SoundVol < 100
+					Game.SoundVol = Game.SoundVol + 10
+				endif
+			else
+				if Game.MusicVol < 100
+					Game.MusicVol = Game.MusicVol + 10
+					SetMusicVolumeOGG(Game.TitleThemeID,Game.MusicVol)
+				endif
+			endif
+
+		endif
+
+		if CheckInputUpStateDown(Game.JoystickIndex,Game.InputTimer,Game.Time) = TRUE
+			// select sound or music
+			if Game.SelectSound = 0
+				Game.SelectSound = 1
+			else
+				Game.SelectSound = 0
+			endif
+		endif
+
+		if CheckInputDownStateDown(Game.JoystickIndex,Game.InputTimer,Game.Time) = TRUE
+			// select sound or music
+			if Game.SelectSound = 1
+				Game.SelectSound = 0
+			else
+				Game.SelectSound = 1
+			endif
+		endif
+	
+	endif
+
 	if Game.IsRunning = TRUE and Game.IsBlockMoving = TRUE
 		
 		if CheckInputLeftStateDown(Game.JoystickIndex,Game.InputTimer,Game.Time) = TRUE

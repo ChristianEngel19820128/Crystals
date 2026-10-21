@@ -33,13 +33,20 @@ cy = vy/2
 
 SetVirtualResolution(vx,vy)
 
-SetSyncRate(60,0)
-SetScissor(0,0,0,0)
-UseNewDefaultFonts(1)
-
 #option_explicit
 
 #constant Device$ GetDeviceBaseName()
+
+If Device$ = "html5"
+	SetSyncRate(60,0)
+else
+	SetSyncRate(120,0)
+endif
+
+SetScissor(0,0,0,0)
+UseNewDefaultFonts(1)
+
+
 
 #constant FALSE 0
 #constant TRUE 1
@@ -80,6 +87,9 @@ repeat
 	
 	SetTextString(Game.FPS,Str(Trunc(ScreenFPS())))
 	
+	if Game.IsPause = FALSE
+		Game.Time.VirtualNow = Game.Time.VirtualNow + GetMilliseconds() - Game.Time.RealNow
+	endif
 	Game.Time.RealNow = GetMilliseconds()
 	
 	GameInputDo(Game,Game.Time.RealNow)

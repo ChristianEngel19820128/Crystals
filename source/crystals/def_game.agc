@@ -235,7 +235,11 @@ type TGame
 	
 	AbsoluteScore as integer
 	CollectedScore as integer
-	
+
+	GuiAbsoluteScore as integer
+	GuiMaxCollectedScore as integer
+	GuiCollectedScore as integer
+
 	Cascade as integer
 	HighestCascade as integer
 	Gems as integer
@@ -284,7 +288,19 @@ type TGame
 	TxtSummerySelectChar as integer
 	TimerSummeryText as TTime
 	SwitchSummeryText as integer
-	
+
+	ScoreTimer as TTime
+
+	SoundVol as integer
+	MusicVol as integer
+	SelectSound as integer
+
+	TextSound as integer
+	TextSoundVol as integer
+	TextMusic as integer
+	TextMusicVol as integer
+	TextSelectSound as integer
+
 	NextLevelSoundID as integer
 	ExplodeSoundID as integer
 	BlockFallSoundID as integer
@@ -294,6 +310,8 @@ type TGame
 	MenuSelectSoundID as integer
 	ScoreSoundID as integer
 	
+	TitleThemeID as integer
+
 endtype
 
 //----------------------------------------------------------------------

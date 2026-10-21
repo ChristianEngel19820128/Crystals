@@ -5,7 +5,7 @@
 
 function StartGameInitialisation(Game ref as TGame)
 
-	SoundPlay(Game.MenuSelectSoundID)
+	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
 	GameInit(Game)
 
 endfunction
@@ -16,7 +16,7 @@ endfunction
 
 function PauseGame(Game ref as TGame)
 
-	SoundPlay(Game.MenuSelectSoundID)
+	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
 	GamePause(Game)
 
 endfunction
@@ -27,7 +27,7 @@ endfunction
 
 function AbortGame(Game ref as TGame)
 
-	SoundPlay(Game.MenuSelectSoundID)
+	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
 	Game.IsRunning = FALSE
 	Game.IsPause = FALSE
 	Game.IsDifficultySelect = FALSE
@@ -46,7 +46,7 @@ endfunction
 
 function WhileGameShuffleBlock(Game ref as TGame,Alignment as integer)
 
-	SoundPlay(Game.BlockShuffleSoundID)
+	SoundPlay(Game.BlockShuffleSoundID,Game.SoundVol)
 	MovebleBlockShuffle(Game.CurrentBlock,Alignment)
 
 endfunction
@@ -57,7 +57,7 @@ endfunction
 
 function WhileGameDropBlock(Game ref as TGame)
 
-	SoundPlay(Game.BlockDropSoundID)
+	SoundPlay(Game.BlockDropSoundID,Game.SoundVol)
 	MovebleBlockMoveFast(Game.CurrentBlock)
 	MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
 
@@ -89,7 +89,7 @@ endfunction
 
 function DifficultyMoveUp(Game ref as TGame)
 
-	SoundPlay(Game.MenuSoundID)
+	SoundPlay(Game.MenuSoundID,Game.SoundVol)
 	Game.Difficulty = Game.Difficulty +1
 	if Game.Difficulty > MAXDIFFICULTY
 		Game.Difficulty = 0
@@ -103,7 +103,7 @@ endfunction
 
 function DifficultyMoveDown(Game ref as TGame)
 
-	SoundPlay(Game.MenuSoundID)
+	SoundPlay(Game.MenuSoundID,Game.SoundVol)
 	Game.Difficulty = Game.Difficulty -1
 	if Game.Difficulty < 0
 		Game.Difficulty = MAXDIFFICULTY
@@ -117,7 +117,7 @@ endfunction
 
 function DifficultySelect(Game ref as TGame,Now as integer)
 
-	SoundPlay(Game.MenuSelectSoundID)
+	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
 	Game.IsRunning = TRUE
 	Game.IsBlockMoving = TRUE
 	TimeReset(Game.CurrentBlock.MoveTime,Now)
@@ -131,7 +131,7 @@ endfunction
 
 function EnterNameMoveUP(Game ref as TGame)
 
-	SoundPlay(Game.MenuSoundID)
+	SoundPlay(Game.MenuSoundID,Game.SoundVol)
 	SummaryEnterNameShiftUp(Game.Summary)
 
 endfunction
@@ -142,7 +142,7 @@ endfunction
 
 function EnterNameMoveDown(Game ref as TGame)
 
-	SoundPlay(Game.BlockFallSoundID)
+	SoundPlay(Game.BlockFallSoundID,Game.SoundVol)
 	SummaryEnterNameShiftDown(Game.Summary)
 
 endfunction
@@ -153,7 +153,7 @@ endfunction
 
 function EnterNameMoveLeft(Game ref as TGame)
 
-	SoundPlay(Game.MenuSoundID)
+	SoundPlay(Game.MenuSoundID,Game.SoundVol)
 	SummaryEnterNameShiftLeft(Game.Summary)
 
 endfunction
@@ -164,7 +164,7 @@ endfunction
 
 function EnterNameMoveRight(Game ref as TGame)
 
-	SoundPlay(Game.MenuSoundID)
+	SoundPlay(Game.MenuSoundID,Game.SoundVol)
 	SummaryEnterNameShiftRight(Game.Summary)
 
 endfunction
@@ -175,7 +175,7 @@ endfunction
 
 function SummarySelect(Game ref as TGame)
 
-	SoundPlay(Game.MenuSelectSoundID)
+	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
 	if Game.IsNewHighScore = TRUE
 		HighScoreInsertName(Game.HighScore,Game.Summary)
 	endif
@@ -197,7 +197,7 @@ endfunction
 
 function HighscoreSwitchShiftLeft(Game ref as TGame)
 
-	SoundPlay(Game.MenuSoundID)
+	SoundPlay(Game.MenuSoundID,Game.SoundVol)
 	HighScoreShiftLeft(Game.HighScore)
 
 endfunction
@@ -208,7 +208,7 @@ endfunction
 
 function HighscoreSwitchShiftRight(Game ref as TGame)
 
-	SoundPlay(Game.MenuSoundID)
+	SoundPlay(Game.MenuSoundID,Game.SoundVol)
 	HighScoreShiftRight(Game.HighScore)				
 
 endfunction

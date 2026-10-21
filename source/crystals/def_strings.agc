@@ -19,13 +19,16 @@
 #constant OUTPUT_MEDIUM "MEDIUM"
 #constant OUTPUT_EASY "EASY"
 
-
-
 #constant OUTPUT_SELECTULTRA "_______"
 #constant OUTPUT_SELECTHARD "______"
 #constant OUTPUT_SELECTADVANCED "___________"
 #constant OUTPUT_SELECTMEDIUM "_________"
 #constant OUTPUT_SELECTEASY "_____"
+
+#constant OUTPUT_SOUND "SOUND"
+#constant OUTPUT_MUSIC "MUSIC"
+#constant OUTPUT_OFF "OFF"
+#constant OUTPUT_SELECTSOUND "________"
 
 //----------------------------------------------------------------------
 //

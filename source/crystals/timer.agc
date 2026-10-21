@@ -16,6 +16,7 @@ endtype
 
 type TTime
 
+	Init as integer
 	Stamp as integer
 	Span as integer
 	Multiplier as float
@@ -32,6 +33,7 @@ endtype
 
 function TimeSet(Object ref as TTime,Span as integer,Range as float)
 
+	Object.Init = 1
 	// last timestamp
 	Object.Stamp = 0
 	// time span to check for

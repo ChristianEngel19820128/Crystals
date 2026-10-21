@@ -57,23 +57,28 @@ function SoundInit(Game ref as TGame)
 		Game.ScoreSoundID = LoadSound(File.Name)
 	endif
 
+	File.Name = "hello2.ogg"
+	
+	if FilePathSetAndCheck(File)
+		Game.TitleThemeID = LoadMusicOGG(File.Name)
+	endif
+
 endfunction
 
 //----------------------------------------------------------------------
 //
 //----------------------------------------------------------------------
 
-function SoundPlayPitched(SoundID as integer,Rate as integer)
+function SoundPlayPitched(SoundID as integer,Rate as float,Vol as integer)
 	
 	local Value as integer
 	
 	if GetSoundExists(SoundID) = 1
-		if GetSoundMinRate() < Rate and GetSoundMaxRate() > Rate
-			SetSoundInstanceRate(SoundID,Rate)
-		else
-			SetSoundInstanceRate(SoundID,1)
-		endif
 		Value = PlaySound(SoundID)
+		SetSoundInstanceVolume(Value,Vol)
+		if GetSoundMinRate() < Rate and GetSoundMaxRate() > Rate
+			SetSoundInstanceRate(Value,Rate)
+		endif
 	endif
 
 endfunction Value
@@ -82,11 +87,11 @@ endfunction Value
 //
 //----------------------------------------------------------------------
 
-function SoundPlay(SoundID as integer)
+function SoundPlay(SoundID as integer,Vol as integer)
 	
 	local Value as integer
 	
-	SoundPlayPitched(SoundID,1)
+	Value = SoundPlayPitched(SoundID,1,Vol)
 
 endfunction Value
 

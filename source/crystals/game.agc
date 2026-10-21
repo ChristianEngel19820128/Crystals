@@ -10,6 +10,7 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 	local fx as float
 	local fy as float
 	local i as integer
+	local vol as string
 	
 	fcx = cx +(264-225)
 	fcy = cy +(463-400)
@@ -276,7 +277,60 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 	SetTextBold(Game.TxtSummerySelectChar,1)
 	SetTextAlignment(Game.TxtSummerySelectChar,1)
 	
+	TimeSet(Game.ScoreTimer,50,1)
+
 	SoundInit(Game)
+
+	Game.SoundVol = 80
+	Game.MusicVol = 50
+
+	SetMusicVolumeOGG(Game.TitleThemeID,Game.MusicVol)
+	PlayMusicOGG(Game.TitleThemeID,1)
+
+	Game.TextSound = CreateText(OUTPUT_SOUND)
+	SetTextPosition(Game.TextSound,fcx,fcy-200)
+	SetTextSize(Game.TextSound,32)
+	SetTextBold(Game.TextSound,1)
+	SetTextAlignment(Game.TextSound,1)
+
+	Game.TextSoundVol = CreateText(OUTPUT_OFF)
+	SetTextPosition(Game.TextSoundVol,fcx,fcy-165)
+	SetTextSize(Game.TextSoundVol,28)
+	SetTextBold(Game.TextSoundVol,1)
+	SetTextAlignment(Game.TextSoundVol,1)
+
+	if Game.SoundVol > 0
+		vol = ""
+		for i = 1 to floor(Game.SoundVol*0.1)
+			vol = vol + "|"
+		next i
+		SetTextString(Game.TextSoundVol,vol)
+	endif
+
+	Game.TextMusic = CreateText(OUTPUT_MUSIC)
+	SetTextPosition(Game.TextMusic,fcx,fcy-130)
+	SetTextSize(Game.TextMusic,32)
+	SetTextBold(Game.TextMusic,1)
+	SetTextAlignment(Game.TextMusic,1)
+
+	Game.TextMusicVol = CreateText(OUTPUT_OFF)
+	SetTextPosition(Game.TextMusicVol,fcx,fcy-95)
+	SetTextSize(Game.TextMusicVol,28)
+	SetTextBold(Game.TextMusicVol,1)
+	SetTextAlignment(Game.TextMusicVol,1)
+
+	if Game.MusicVol > 0
+		vol = ""
+		for i = 1 to floor(Game.MusicVol*0.1)
+			vol = vol + "|"
+		next i
+	endif
+
+	Game.TextSelectSound = CreateText(OUTPUT_SELECTSOUND)
+	SetTextPosition(Game.TextSelectSound,fcx,fcy-130)
+	SetTextSize(Game.TextSelectSound,32)
+	SetTextBold(Game.TextSelectSound,1)
+	SetTextAlignment(Game.TextSelectSound,1)
 
 endfunction
 
@@ -300,6 +354,9 @@ function GameInit(Game ref as TGame)
 	
 	Game.AbsoluteScore = 0
 	Game.CollectedScore = 0
+
+	Game.GuiAbsoluteScore = 0
+	Game.GuiCollectedScore = 0
 	
 	Game.Cascade = 0
 	Game.HighestCascade = 0
@@ -314,8 +371,8 @@ function GameInit(Game ref as TGame)
 	SetTextString(Game.TxtGems,Str(Game.Gems))
 	SetTextString(Game.TxtLevel,Str(Game.Level))
 	
-	SetTextString(Game.TxtAbsoluteScore,Str(Game.AbsoluteScore))
-	SetTextString(Game.TxtCollectedScore,Str(Game.CollectedScore))
+	SetTextString(Game.TxtAbsoluteScore,Str(Game.GuiAbsoluteScore))
+	SetTextString(Game.TxtCollectedScore,Str(Game.GuiCollectedScore))
 	SetTextString(Game.TxtCascade,Str(Game.Cascade))
 
 	Game.IsDifficultySelect = TRUE
@@ -357,15 +414,45 @@ function GameDo(Game ref as TGame)
 	local GemCount as integer
 	local Color as TColor
 	local i as integer
-	
+	local ScoreInstanceID as integer
+	local ExplodeInstanceID as integer
+	local LevelUpInstanceID as integer
+	local ScoreRate as float
+
 	if Game.IsRunning = TRUE
 		if Game.IsPause = FALSE
-			
+
+			if Game.CollectedScore <> 0
+				Game.GUIAbsoluteScore = Game.AbsoluteScore
+				Game.GuiCollectedScore = Game.CollectedScore
+				Game.GuiMaxCollectedScore = Game.CollectedScore
+			else
+				if TimeGet(Game.ScoreTimer,Game.Time.VirtualNow)
+					TimeReset(Game.ScoreTimer,Game.Time.VirtualNow)
+					if Game.GuiCollectedScore > 0
+						if GetSoundInstances(Game.ScoreSoundID) = 0
+							ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,1,Game.SoundVol*0.5)
+						else
+							SetSoundInstanceVolume(ScoreInstanceID,Game.SoundVol*0.25)	
+							ScoreRate = 1.05-Game.GuiCollectedScore*0.1/Game.GuiMaxCollectedScore
+							ScoreInstanceID = SoundPlaypitched(Game.ScoreSoundID,ScoreRate,Game.SoundVol*0.5)
+						endif
+					endif
+					if Game.GuiCollectedScore > 9
+						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + ceil(Game.GuiCollectedScore * 0.1)
+						Game.GuiCollectedScore = Game.GuiCollectedScore - ceil(Game.GuiCollectedScore * 0.1)
+					else
+						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + Game.GuiCollectedScore 
+						Game.GuiCollectedScore = 0
+					endif
+				endif
+			endif
+
 			if Game.IsBlockMoving = TRUE
 				
 				if MovebleBlockCollide(Game.CurrentBlock,Game.Field) = FALSE
-					CountSteps = MovebleBlockMoveDown(Game.CurrentBlock,Game.Field,Game.Time.RealNow)
-					TimeReset(Game.CurrentBlock.SetUpTime,Game.Time.RealNow)
+					CountSteps = MovebleBlockMoveDown(Game.CurrentBlock,Game.Field,Game.Time.VirtualNow)
+					TimeReset(Game.CurrentBlock.SetUpTime,Game.Time.VirtualNow)
 					if Game.CurrentBlock.IsFast
 						Game.CollectedScore = Game.CollectedScore + Ceil(CountSteps/10)
 					endif
@@ -377,8 +464,8 @@ function GameDo(Game ref as TGame)
 						Game.Summary.IsInit = TRUE
 						Game.HighScore.IsNew = TRUE
 					else
-						SoundPlay(Game.BlockDropSoundID)
-						if TimeGet(Game.CurrentBlock.SetUpTime,Game.Time.RealNow) > 0
+						SoundPlay(Game.BlockDropSoundID,Game.SoundVol)
+						if TimeGet(Game.CurrentBlock.SetUpTime,Game.Time.VirtualNow) > 0
 							BlockCopyToField(Game.CurrentBlock,Game.Field)
 							Game.IsBlockMoving = FALSE
 						endif
@@ -397,12 +484,20 @@ function GameDo(Game ref as TGame)
 							if Game.NewLevel > Game.Level
 								Game.LastLevel = Game.Level
 								Game.Level = Game.NewLevel
-								SoundPlay(Game.NextLevelSoundID)
+								LevelUpInstanceID = SoundPlay(Game.NextLevelSoundID,Game.SoundVol*0.75)
 								MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
 							endif
-							ExplosionReset(Game.Explosion,Game.Time.RealNow)
+							ExplosionReset(Game.Explosion,Game.Time.VirtualNow)
 							Game.IsFieldExploding = TRUE
-							SoundPlayPitched(Game.ExplodeSoundID,1+Game.Cascade*0.1)
+
+							if GetSoundInstances(Game.NextLevelSoundID) = 0 and GetSoundInstances(Game.ExplodeSoundID) = 0
+								ExplodeInstanceID = SoundPlayPitched(Game.ExplodeSoundID,1+Game.Cascade*0.1,Game.SoundVol)
+							else
+								if GetSoundInstances(Game.NextLevelSoundID) <> 0 then SetSoundInstanceVolume(LevelUpInstanceID,Game.SoundVol*0.25)
+								if GetSoundInstances(Game.ExplodeSoundID) <> 0 then SetSoundInstanceVolume(ExplodeInstanceID,Game.SoundVol*0.25)
+								ExplodeInstanceID = SoundPlayPitched(Game.ExplodeSoundID,1+Game.Cascade*0.015,Game.SoundVol)
+							endif
+
 							Game.Cascade = Game.Cascade +1
 							if Game.Cascade > 1
 								ColorSet(Color,0,0,0,255)
@@ -420,7 +515,6 @@ function GameDo(Game ref as TGame)
 									Game.HighestCascade = Game.Cascade
 								endif
 								
-								SoundPlay(Game.ScoreSoundID)
 								Game.Cascade = 0
 								Game.AbsoluteScore = Game.AbsoluteScore + Game.CollectedScore
 								Game.CollectedScore = 0
@@ -446,7 +540,7 @@ function GameDo(Game ref as TGame)
 									
 									Game.CurrentBlock.Block = Game.NextBlock
 									BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
-									MovebleBlockInit(Game.CurrentBlock,Game.Time.RealNow)
+									MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
 									Game.IsBlockMoving = TRUE
 									Game.CurrentBlock.IsFast = FALSE
 									MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
@@ -456,12 +550,14 @@ function GameDo(Game ref as TGame)
 						endif
 					endif
 				else
-					if FieldExplosionAnimate(Game.Field,Game.Explosion,Game.Time.RealNow) = FALSE
+					if FieldExplosionAnimate(Game.Field,Game.Explosion,Game.Time.VirtualNow) = FALSE
 						Game.IsFieldExploding = FALSE
 					endif
 				endif
 			endif
-			
+		
+		else
+			// pause
 		endif
 	else
 		
@@ -492,6 +588,7 @@ function GameDraw(Game ref as TGame)
 	local x as float
 	local y as float
 	local i as integer
+	local vol as string
 	
 	BackgroundDraw(Game.Background)
 		
@@ -507,14 +604,50 @@ function GameDraw(Game ref as TGame)
 		endif
 		
 		if Game.IsPause = TRUE
+
+			if Game.SelectSound = 0
+				SetTextPosition(Game.TextSelectSound,GetTextX(Game.TextSound),GetTextY(Game.TextSound))
+			else
+				SetTextPosition(Game.TextSelectSound,GetTextX(Game.TextMusic),GetTextY(Game.TextMusic))
+			endif
+
+			DrawText(Game.TextSelectSound)
+
+			if Game.SoundVol > 0
+				vol = ""
+				for i = 1 to floor(Game.SoundVol*0.1)
+					vol = vol + "|"
+				next i
+				SetTextString(Game.TextSoundVol,vol)
+			else
+				SetTextString(Game.TextSoundVol,OUTPUT_OFF)
+			endif
+
+			DrawText(Game.TextSound)
+			DrawText(Game.TextSoundVol)
+
+			if Game.MusicVol > 0
+				vol = ""
+				for i = 1 to floor(Game.MusicVol*0.1)
+					vol = vol + "|"
+				next i
+				SetTextString(Game.TextMusicVol,vol)
+			else
+				SetTextString(Game.TextMusicVol,OUTPUT_OFF)
+			endif
+
+			DrawText(Game.TextMusic)
+			DrawText(Game.TextMusicVol)
+
 			Drawtext(Game.TextPause)
+
 		endif
 		
 		SetTextString(Game.TxtGems,Str(Game.Gems))
 		SetTextString(Game.TxtLevel,Str(Game.Level))
 		
-		SetTextString(Game.TxtAbsoluteScore,Str(Game.AbsoluteScore))
-		SetTextString(Game.TxtCollectedScore,Str(Game.CollectedScore))
+		SetTextString(Game.TxtAbsoluteScore,Str(Game.GuiAbsoluteScore))
+		SetTextString(Game.TxtCollectedScore,Str(Game.GuiCollectedScore))
 		SetTextString(Game.TxtCascade,Str(Game.Cascade))
 	
 		Drawtext(Game.TxtLevel)
