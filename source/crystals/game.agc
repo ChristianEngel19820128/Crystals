@@ -32,7 +32,7 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 	Game.IsFieldExploding = FALSE
 	Game.IsNewHighScore = FALSE
 	
-	SetJoystickIndex(Game)
+	SetJoystickIndex(Game.Joystick)
 	
 	HighScoreCreate(Game.HighScore,fcx,fcy)
 	
@@ -346,7 +346,7 @@ function GameInit(Game ref as TGame)
 	BlockGenerate(Game.CurrentBlock.Block,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
 	BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
 	
-	MovebleBlockInit(Game.CurrentBlock,Game.Time.RealNow)
+	MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
 	
 	Game.Difficulty = 1
 	
@@ -386,7 +386,7 @@ function GameInit(Game ref as TGame)
 	Game.IsFieldExploding = FALSE
 	Game.IsNewHighScore = FALSE
 	
-	ExplosionReset(Game.Explosion,Game.Time.RealNow)
+	ExplosionReset(Game.Explosion,Game.Time.VirtualNow)
 	
 endfunction
 
@@ -433,11 +433,11 @@ function GameDo(Game ref as TGame)
 					TimeReset(Game.ScoreTimer,Game.Time.VirtualNow)
 					if Game.GuiCollectedScore > 0
 						if GetSoundInstances(Game.ScoreSoundID) = 0
-							ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,1,Game.SoundVol*0.5)
+							ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,1,Game.SoundVol*0.4)
 						else
-							SetSoundInstanceVolume(ScoreInstanceID,Game.SoundVol*0.25)	
-							ScoreRate = 1.05-Game.GuiCollectedScore*0.1/Game.GuiMaxCollectedScore
-							ScoreInstanceID = SoundPlaypitched(Game.ScoreSoundID,ScoreRate,Game.SoundVol*0.5)
+							SetSoundInstanceVolume(ScoreInstanceID,Game.SoundVol*0.2)	
+							ScoreRate = 1.01-Game.GuiCollectedScore*0.02/Game.GuiMaxCollectedScore
+							ScoreInstanceID = SoundPlaypitched(Game.ScoreSoundID,ScoreRate,Game.SoundVol*0.4)
 						endif
 					endif
 					if Game.GuiCollectedScore > 9
@@ -596,15 +596,17 @@ function GameDraw(Game ref as TGame)
 		
 	if Game.IsRunning = TRUE
 		
-		BlockDraw(Game.NextBlock,Game.ProtoCrystalList)
-		FieldDraw(Game.Field,Game.ProtoCrystalList)
-		if Game.IsBlockMoving = TRUE
-			MovebleBlockDraw(Game.CurrentBlock,Game.ProtoBlock,Game.ProtoCrystalList,Game.Field.Position1,Game.Field.Position2)
+		if Game.IsPause = FALSE
+			BlockDraw(Game.NextBlock,Game.ProtoCrystalList)
+			FieldDraw(Game.Field,Game.ProtoCrystalList)
+			if Game.IsBlockMoving = TRUE
+				MovebleBlockDraw(Game.CurrentBlock,Game.ProtoBlock,Game.ProtoCrystalList,Game.Field.Position1,Game.Field.Position2)
+			endif
+			if Game.IsFieldExploding = TRUE
+				ExplosionDraw(Game.Field,Game.Explosion)
+			endif
 		endif
-		if Game.IsFieldExploding = TRUE
-			ExplosionDraw(Game.Field,Game.Explosion)
-		endif
-		
+
 		if Game.IsPause = TRUE
 
 			if Game.SelectSound = 0

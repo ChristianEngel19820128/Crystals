@@ -20,20 +20,40 @@
 #CONSTANT JoystickButtonCrossRight 15
 #CONSTANT JoystickButtonCrossDown 16
 
+type TJoystick
+
+	Enabled as integer
+	Index as integer
+
+endtype
+
 //----------------------------------------------------------------------
 // 
 //----------------------------------------------------------------------
 
-function SetJoystickIndex(Game ref as TGame)
+function SetJoystickIndex(Joystick ref as TJoystick)
 	
 	local i as integer
 	
-	Game.JoystickIndex = 1
+	Joystick.Enabled = 0
+	Joystick.Index = 1
 	
-	for i = 8 to 1 step -1
-		if GetRawJoystickExists(i) then Game.JoystickIndex = i
-	next i
-	
+	If Device$ = "windows"
+		CompleteRawJoystickDetection()
+		for i = 8 to 1 step -1
+			if GetRawJoystickExists(i)
+				Joystick.Enabled = 1
+				Joystick.Index = i
+			endif
+		next i
+	endif
+
+	// work arround for new html5 player
+	If Device$ = "html5"
+		Joystick.Enabled = 1
+		Joystick.Index = 1
+	endif
+
 endfunction
 
 //----------------------------------------------------------------------

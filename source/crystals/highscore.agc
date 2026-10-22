@@ -187,11 +187,13 @@ function HighScoreCheckTable(Table ref as THighScore[],Score as integer)
 	i = Table.Length
 	Found = TRUE
 	while Found = TRUE and i <= Table.Length
-		if Score > Table[i].Score
-			Value = i
-			dec i
-		else
-			Found = FALSE
+		if i >= 0
+			if Score > Table[i].Score
+				Value = i
+				dec i
+			else
+				Found = FALSE
+			endif
 		endif
 	endwhile
 	

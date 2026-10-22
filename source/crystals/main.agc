@@ -92,7 +92,7 @@ repeat
 	endif
 	Game.Time.RealNow = GetMilliseconds()
 	
-	GameInputDo(Game,Game.Time.RealNow)
+	GameInputDo(Game,Game.Time.VirtualNow)
 	GameDo(Game)
 	GameDraw(Game)
 	

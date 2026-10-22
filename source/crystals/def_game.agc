@@ -210,7 +210,8 @@ type TGame
 	FPS as integer
 	Time as TGlobalTime
 	InputTimer as TTime
-	JoystickIndex as integer
+
+	Joystick as TJoystick
 	
 	IsDifficultySelect as integer
 	IsLost as integer
