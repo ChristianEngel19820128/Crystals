@@ -6,7 +6,7 @@ Crystals is an old game played in ancient world of Phoenician from their merchan
 
 # Version
 
-Current Version is V.0.9993
+Current Version is V.0.99946
 
 # License
 
@@ -14,7 +14,11 @@ The license is "Unlicense License". You can do what you want with the code. Soun
 
 # Release
 
-It will be a HTML version 1.0 on itch.io for playing in the browser.
+It will be a HTML5 for playing in the browser and a Windows Download with version 1.0 on itch.io.
+
+# Link to HTML5
+
+https://somebasics.itch.io/crystal-columns
 
 # Game & Goal
 
