@@ -6,7 +6,7 @@ Crystals is an old game played in ancient world of Phoenician from their merchan
 
 # Version
 
-Current Version is V.0.99946
+Current Version is V.0.9995
 
 # License
 
@@ -27,6 +27,14 @@ Place the falling block through moving on the grid. Crystals will explode if the
 The game ends if the crystals on grid reach the top line or there is no more place for the falling block to start falling.
 
 On every tenths level random crystals rise from bottom. In addition to normal crystals there is a Rainbow and a Magic Crystal. Both have special attributes. So the Rainbow Crystal count as every existing color and is just a joker. While the Magic Crystal destroyes all crystals of the same color he lands on.
+
+# Difficulty
+
+On Difficulty Ultra it's possible to submit score to a online storage. There is a timeout of 3 seconds if no network connection is available. Actually it is added a test storage for online submits.
+
+Each Difficult save a scoreboard locally. On HTML5 they will stored as a cookie. On Windows you can find them in AppData/local, if you want to manipulate them.
+
+Additional there are 3 scoreboards for archivments, which count Gems, Levels or Cascades.
 
 # Controls Keyboard
 
@@ -50,7 +58,9 @@ You need to plug in your joypad before game start otherwise joypad controls will
 
 # Sound & Music Files
 
-Sound and music is disabled until files found.
+Sound is added and music is disabled until file is found.
+
+On Pause you can change the volume of sound and music for this session.
 
 - sndnextlvl.wav
 - sndexplode.wav
@@ -66,4 +76,4 @@ Sound and music is disabled until files found.
 # Future Plans
 
 - Adding touch point areas for control when playing on mobil.
-- Adding online highscore to make it work on all devices globally.
+- Adding 2 theme music tracks.

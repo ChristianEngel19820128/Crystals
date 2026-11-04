@@ -22,6 +22,8 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 	SetTextPosition(Game.FPS,10,cy+375)
 	SetTextSize(Game.FPS,20)
 	
+	HighScoreOnlineInit()
+
 	Game.IsRunning = FALSE
 	Game.IsPause = FALSE
 	Game.IsDifficultySelect = FALSE
@@ -277,7 +279,7 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 	SetTextBold(Game.TxtSummerySelectChar,1)
 	SetTextAlignment(Game.TxtSummerySelectChar,1)
 	
-	TimeSet(Game.ScoreTimer,50,1)
+	TimeSet(Game.ScoreTimer,100,1)
 
 	SoundInit(Game)
 
@@ -343,10 +345,6 @@ endfunction
 function GameInit(Game ref as TGame)
 		
 	FieldClear(Game.Field)
-	BlockGenerate(Game.CurrentBlock.Block,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
-	BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
-	
-	MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
 	
 	Game.Difficulty = 1
 	
@@ -420,6 +418,9 @@ function GameDo(Game ref as TGame)
 	local ExplodeInstanceID as integer
 	local LevelUpInstanceID as integer
 	local ScoreRate as float
+	local ScoreVol as integer
+	local ScoreAdd as integer
+	local Rows as integer
 
 	if Game.IsRunning = TRUE
 		if Game.IsPause = FALSE
@@ -436,13 +437,15 @@ function GameDo(Game ref as TGame)
 							ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,1,Game.SoundVol*0.4)
 						else
 							SetSoundInstanceVolume(ScoreInstanceID,Game.SoundVol*0.2)	
-							ScoreRate = 1.01-Game.GuiCollectedScore*0.02/Game.GuiMaxCollectedScore
-							ScoreInstanceID = SoundPlaypitched(Game.ScoreSoundID,ScoreRate,Game.SoundVol*0.4)
+							ScoreRate = 1.00-Game.GuiCollectedScore*0.01/Game.GuiMaxCollectedScore
+							ScoreVol = Game.SoundVol*0.4
+							ScoreInstanceID = SoundPlaypitched(Game.ScoreSoundID,ScoreRate,ScoreVol)
 						endif
 					endif
 					if Game.GuiCollectedScore > 9
-						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + ceil(Game.GuiCollectedScore * 0.1)
-						Game.GuiCollectedScore = Game.GuiCollectedScore - ceil(Game.GuiCollectedScore * 0.1)
+						ScoreAdd = ceil((50*Game.GuiCollectedScore/100))
+						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + ScoreAdd
+						Game.GuiCollectedScore = Game.GuiCollectedScore - ScoreAdd
 					else
 						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + Game.GuiCollectedScore 
 						Game.GuiCollectedScore = 0
@@ -524,8 +527,9 @@ function GameDo(Game ref as TGame)
 								SetTextColor(Game.TxtCollectedScore,255,255,255,255)
 								
 								If Game.NewLevel > Game.LastLevel
-									if mod(Game.NewLevel,10) = 0
-										for i = 1 to Game.NewLevel - Game.LastLevel
+									Rows = Floor(Game.NewLevel / 10.0) - Floor(Game.LastLevel / 10.0)
+									if Rows > 0
+										for i = 1 to ceil(1.0 * Game.NewLevel / 10)
 											if FieldLineCreateBottom(Game.Field,Game.ProtoCrystalList,Game.Difficulty) = FALSE
 												Game.IsRunning = FALSE
 												Game.IsLost = TRUE
@@ -768,6 +772,9 @@ function GameDraw(Game ref as TGame)
 			else
 			
 				select Game.Highscore.Table
+					case TABLEONLINE
+						SetTextString(Game.Highscore.TxtTable,OUTPUT_ONLINE)
+					endcase
 					case TABLECASCADE
 						SetTextString(Game.Highscore.TxtTable,OUTPUT_CASCADE)
 					endcase

@@ -7,8 +7,9 @@
 #constant MAXCHARS 4
 
 #constant MAXHIGHSCOREITEMS 9
-#constant MAXHIGHSCORETABLE 7
+#constant MAXHIGHSCORETABLE 8
 
+#constant TABLEONLINE 8
 #constant TABLECASCADE 7
 #constant TABLELEVEL 6
 #constant TABLEGEMS 5

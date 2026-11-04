@@ -34,6 +34,9 @@ function HighScoreGetTableName(Index as integer)
 		case TABLECASCADE
 			Value = "hs_table_cascade.json"
 		endcase
+		case TABLEONLINE
+			Value = "hs_table_online.json"
+		endcase
 	endselect
 	
 endfunction Value

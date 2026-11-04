@@ -134,6 +134,9 @@ endfunction
 function SummaryHighscoreSetScore(Summary ref as TSummary,Index as integer)
 
 	select Index
+		case TABLEONLINE
+			Summary.HighScore.Score = Summary.AbsoluteScore
+		endcase
 		case TABLECASCADE
 			Summary.HighScore.Score = Summary.HighestCascade
 		endcase

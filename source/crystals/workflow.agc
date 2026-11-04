@@ -118,6 +118,11 @@ endfunction
 function DifficultySelect(Game ref as TGame,Now as integer)
 
 	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
+
+	BlockGenerate(Game.CurrentBlock.Block,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
+	BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)	
+	MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
+
 	Game.IsRunning = TRUE
 	Game.IsBlockMoving = TRUE
 	TimeReset(Game.CurrentBlock.MoveTime,Now)

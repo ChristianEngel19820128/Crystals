@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 
 function HighScoreCreate(HighScoreList ref as THighScoreList,fcx as float,fcy as float)
-	
+
 	HighScoreList.fcx = fcx
 	HighScoreList.fcy = fcy
 	
@@ -25,7 +25,9 @@ function HighScoreCreate(HighScoreList ref as THighScoreList,fcx as float,fcy as
 			HighScoreSaveAsCookie(HighScoreList)
 		endif
 	endif
-	
+
+	HighScoreOnlineReceiveScore(HighScoreList.Score)
+
 endfunction
 
 //----------------------------------------------------------------------
@@ -51,6 +53,7 @@ function HighScoreInit(HighScoreList ref as THighScoreList)
 				if i = TABLEGEMS then Score.Score = k*1000
 				if i = TABLELEVEL then Score.Score = k*10
 				if i = TABLECASCADE then Score.Score = k*2
+				if i = TABLEONLINE then Score.Score = 0
 			endif			
 			HighScoreList.Score[i].Insert(Score)
 		next k
@@ -126,6 +129,10 @@ function HighScoreAnimate(HighScoreList ref as THighScoreList,Now as integer)
 				HighScoreLoadFromCookie(HighScoreList)
 			endif
 			
+			if HighScoreList.Table = TABLEONLINE
+				HighScoreOnlineReceiveScore(HighScoreList.Score)
+			endif
+
 			if HighScoreList.IsNew = FALSE
 				inc HighScoreList.Table
 			endif
@@ -186,14 +193,12 @@ function HighScoreCheckTable(Table ref as THighScore[],Score as integer)
 	
 	i = Table.Length
 	Found = TRUE
-	while Found = TRUE and i <= Table.Length
-		if i >= 0
-			if Score > Table[i].Score
-				Value = i
-				dec i
-			else
-				Found = FALSE
-			endif
+	while Found = TRUE and i >= 0
+		if Score > Table[i].Score
+			Value = i
+			dec i
+		else
+			Found = FALSE
 		endif
 	endwhile
 	
@@ -213,6 +218,10 @@ function HighScoreCheck(HighScoreList ref as THighScoreList,Summary ref as TSumm
 	if HighScoreCheckTable(HighScoreList.Score[TABLEGEMS],Summary.Gems) >= 0 then Value = TRUE
 	if HighScoreCheckTable(HighScoreList.Score[TABLELEVEL],Summary.Level) >= 0 then Value = TRUE
 	if HighScoreCheckTable(HighScoreList.Score[TABLECASCADE],Summary.HighestCascade) >= 0 then Value = TRUE
+
+	HighScoreOnlineReceiveScore(HighScoreList.Score)
+
+	if HighScoreCheckTable(HighScoreList.Score[TABLEONLINE],Summary.AbsoluteScore) >= 0 then Value = TRUE
 
 endfunction Value
 
@@ -278,7 +287,15 @@ function HighScoreInsertName(HighScoreList ref as THighScoreList,Summary ref as 
 	if HighScoreTableInsertName(TABLEGEMS,Summary.HighScore) > -1
 		HighScoreList.Table = TABLEGEMS
 	endif
-	
+
+	if Summary.Difficulty = DIFFICULTY_ULTRA
+		SummaryHighscoreSetScore(Summary,TABLEONLINE)
+		if HighScoreTableInsertName(TABLEONLINE,Summary.HighScore) > -1
+			HighScoreList.Table = TABLEONLINE
+			HighScoreOnlineSendScore(Summary.HighScore.Name,Summary.HighScore.Score)
+		endif
+	endif
+
 endfunction
 
 //----------------------------------------------------------------------

@@ -66,6 +66,7 @@ UseNewDefaultFonts(1)
 #include "block.agc"
 #include "field.agc"
 #include "summary.agc"
+#include "highscore_online.agc"
 #include "highscore_html.agc"
 #include "highscore_windows.agc"
 #include "highscore.agc"
