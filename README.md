@@ -1,66 +1,72 @@
 # Crystals
 
-Game written in App Game Kit Studio
+A puzzle game written in AppGameKit Studio.
 
-Crystals is an old game played in ancient world of Phoenician from their merchants called Columns. With the creation of computers it comes in variations to arcade machines, computers and consoles in the 90s.
+Imagine yourself in the ancient world of Phoenician merchants, playing a mysterious game of colorful gems.
+
+Centuries later, the classic puzzle game *Columns* found its way onto arcade machines, computers, and consoles in the 1990s.
+
+*Crystal Columns* is my own take on this timeless falling-block puzzle game.
 
 # Version
 
-Current Version is V.0.9995
+The current version is 0.9995.
 
 # License
 
-The license is "Unlicense License". You can do what you want with the code. Sound & music is not included if it's created by other people.
+The code is released under the Unlicense. You can use, modify, and distribute it freely. Sound and music created by third parties are not covered by this license.
 
 # Release
 
-It will be a HTML5 for playing in the browser and a Windows Download with version 1.0 on itch.io.
+Version 1.0 is planned for release on itch.io as an HTML5 game playable in your browser and as a Windows download.
 
 # Link to HTML5
 
 https://somebasics.itch.io/crystal-columns
 
-# Game & Goal
+# Gameplay & Objective
 
-Place the falling block through moving on the grid. Crystals will explode if there were 3 or more of the same color in one horizontal, vertical or diagonal line. Cascades of explosions increase your score outcome. Every gem you destroy counts.
+Move the falling block across the grid to position its crystals. Three or more crystals of the same color in a horizontal, vertical, or diagonal line will explode. Chain reactions (cascades) increase your score. Every gem you destroy counts.
 
-The game ends if the crystals on grid reach the top line or there is no more place for the falling block to start falling.
+The game ends when the crystals reach the top of the grid or there is no room for a new falling block to appear.
 
-On every tenths level random crystals rise from bottom. In addition to normal crystals there is a Rainbow and a Magic Crystal. Both have special attributes. So the Rainbow Crystal count as every existing color and is just a joker. While the Magic Crystal destroyes all crystals of the same color he lands on.
+Every ten levels, a row of random crystals rises from the bottom. In addition to normal crystals, there are Rainbow and Magic Crystals, each with special properties. The Rainbow Crystal acts as a joker and can count as any existing color. The Magic Crystal destroys all crystals of the same color as the one it lands on.
 
-# Difficulty
+# Difficulty & Highscores
 
-On Difficulty Ultra it's possible to submit score to a online storage. There is a timeout of 3 seconds if no network connection is available. Actually it is added a test storage for online submits.
+On Ultra difficulty, you can submit your score to an online leaderboard. If no network connection is available, the connection attempt times out after three seconds. Online submissions currently use a test leaderboard.
 
-Each Difficult save a scoreboard locally. On HTML5 they will stored as a cookie. On Windows you can find them in AppData/local, if you want to manipulate them.
+Each difficulty level has its own local highscore table. In the HTML5 version, scores are stored as cookies. On Windows, you can find them under AppData/Local if you want to edit them.
 
-Additional there are 3 scoreboards for archivments, which count Gems, Levels or Cascades.
+There are also three additional achievement leaderboards that track gems, levels, and cascades.
 
-# Controls Keyboard
+# Keyboard Controls
 
-- Enter - Menu Confirm
-- Back - Menu Back
-- ESC - End Game
-- A/D/Left/Right - Move Block
-- W/Up - Shuffle Block up
-- S/Down - Drop Block
+- Enter - Confirm menu selection
+- Back - Go back in menus
+- Esc - End game
+- A/D or Left/Right - Move block
+- W or Up - Shuffle block upward
+- S or Down - Drop block
 
-# Controls Joypad
+# Controller Controls
 
-You need to plug in your joypad before game start otherwise joypad controls will be disabled.
+Connect your controller before starting the game; otherwise, controller input will be disabled.
 
-- Start - Menu Confirm
-- Back - Menu Back
-- Stick/Cross Left/Right - Move Block
-- Stick/Cross Down - Drop Block
-- Button A - Shuffle Block down
-- Button B - Shuffle Block up
+- Start - Confirm menu selection
+- Back - Go back in menus
+- Stick/D-pad Left/Right - Move block
+- Stick/D-pad Down - Drop block
+- Button A - Shuffle block downward
+- Button B - Shuffle block upward
 
-# Sound & Music Files
+# Sound & Music
 
-Sound is added and music is disabled until file is found.
+Sound effects are included. Music is currently disabled until suitable music files are available.
 
-On Pause you can change the volume of sound and music for this session.
+While the game is paused, you can adjust the sound and music volume for the current session.
+
+Sound effect files:
 
 - sndnextlvl.wav
 - sndexplode.wav
@@ -71,9 +77,11 @@ On Pause you can change the volume of sound and music for this session.
 - sndmenuselect.wav
 - sndscore.wav
 
-- *.ogg
+Planned music format:
 
-# Future Plans
+- `*.ogg`
 
-- Adding touch point areas for control when playing on mobil.
-- Adding 2 theme music tracks.
+# Planned Features
+
+- Add touch controls for mobile devices.
+- Add two theme music tracks.
