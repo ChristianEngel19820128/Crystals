@@ -386,6 +386,10 @@ function GameInit(Game ref as TGame)
 	
 	ExplosionReset(Game.Explosion,Game.Time.VirtualNow)
 	
+	Game.ScoreInstanceID = 0
+	Game.ExplodeInstanceID = 0
+	Game.LevelUpInstanceID = 0
+
 endfunction
 
 //----------------------------------------------------------------------
@@ -414,13 +418,13 @@ function GameDo(Game ref as TGame)
 	local GemCount as integer
 	local Color as TColor
 	local i as integer
-	local ScoreInstanceID as integer
-	local ExplodeInstanceID as integer
-	local LevelUpInstanceID as integer
 	local ScoreRate as float
 	local ScoreVol as integer
 	local ScoreAdd as integer
 	local Rows as integer
+	local ScoreCurve as float
+	local ScoreProgress as float
+	local ExplodeRate as float
 
 	if Game.IsRunning = TRUE
 		if Game.IsPause = FALSE
@@ -440,21 +444,29 @@ function GameDo(Game ref as TGame)
 				if TimeGet(Game.ScoreTimer,Game.Time.VirtualNow)
 					TimeReset(Game.ScoreTimer,Game.Time.VirtualNow)
 					if Game.GuiCollectedScore > 0
-						if GetSoundInstances(Game.ScoreSoundID) = 0
-							ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,1,Game.SoundVol*0.4)
-						else
-							SetSoundInstanceVolume(ScoreInstanceID,Game.SoundVol*0.2)	
-							ScoreRate = 1.00-Game.GuiCollectedScore*0.01/Game.GuiMaxCollectedScore
-							ScoreVol = Game.SoundVol*0.4
-							ScoreInstanceID = SoundPlaypitched(Game.ScoreSoundID,ScoreRate,ScoreVol)
+						ScoreProgress = 1.0-Game.GuiCollectedScore*1.0/Game.GuiMaxCollectedScore
+						ScoreCurve = 3.0*ScoreProgress/(1.0+2.0*ScoreProgress)
+						
+						ScoreRate = 0.85+0.15*ScoreCurve
+						ScoreVol = Game.SoundVol*0.4
+						
+						if GetSoundInstancePlaying(Game.ScoreInstanceID) = TRUE
+							SetSoundInstanceVolume(Game.ScoreInstanceID,Game.SoundVol*0.2)
 						endif
+						
+						Game.ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,ScoreRate,ScoreVol)
 					endif
 					if Game.GuiCollectedScore > 9
-						ScoreAdd = ceil((50*Game.GuiCollectedScore/100))
+						ScoreAdd = ceil(Game.GuiCollectedScore*(0.1+0.4*(1.0-ScoreCurve)))
+					
+						if ScoreAdd > Game.GuiCollectedScore
+							ScoreAdd = Game.GuiCollectedScore
+						endif
+					
 						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + ScoreAdd
 						Game.GuiCollectedScore = Game.GuiCollectedScore - ScoreAdd
 					else
-						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + Game.GuiCollectedScore 
+						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + Game.GuiCollectedScore
 						Game.GuiCollectedScore = 0
 					endif
 				endif
@@ -496,19 +508,23 @@ function GameDo(Game ref as TGame)
 							if Game.NewLevel > Game.Level
 								Game.LastLevel = Game.Level
 								Game.Level = Game.NewLevel
-								LevelUpInstanceID = SoundPlay(Game.NextLevelSoundID,Game.SoundVol*0.75)
+								Game.LevelUpInstanceID = SoundPlay(Game.NextLevelSoundID,Game.SoundVol*0.75)
 								MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
 							endif
 							ExplosionReset(Game.Explosion,Game.Time.VirtualNow)
 							Game.IsFieldExploding = TRUE
 
-							if GetSoundInstances(Game.NextLevelSoundID) = 0 and GetSoundInstances(Game.ExplodeSoundID) = 0
-								ExplodeInstanceID = SoundPlayPitched(Game.ExplodeSoundID,1+Game.Cascade*0.1,Game.SoundVol)
-							else
-								if GetSoundInstances(Game.NextLevelSoundID) <> 0 then SetSoundInstanceVolume(LevelUpInstanceID,Game.SoundVol*0.25)
-								if GetSoundInstances(Game.ExplodeSoundID) <> 0 then SetSoundInstanceVolume(ExplodeInstanceID,Game.SoundVol*0.25)
-								ExplodeInstanceID = SoundPlayPitched(Game.ExplodeSoundID,1+Game.Cascade*0.015,Game.SoundVol)
+							ExplodeRate = 1.0+0.3*Game.Cascade/(Game.Cascade+3.0)
+							
+							if GetSoundInstancePlaying(Game.LevelUpInstanceID) = TRUE
+								SetSoundInstanceVolume(Game.LevelUpInstanceID,Game.SoundVol*0.25)
 							endif
+							
+							if GetSoundInstancePlaying(Game.ExplodeInstanceID) = TRUE
+								SetSoundInstanceVolume(Game.ExplodeInstanceID,Game.SoundVol*0.25)
+							endif
+							
+							Game.ExplodeInstanceID = SoundPlayPitched(Game.ExplodeSoundID,ExplodeRate,Game.SoundVol)
 
 							Game.Cascade = Game.Cascade +1
 							if Game.Cascade > 1
@@ -528,9 +544,6 @@ function GameDo(Game ref as TGame)
 								endif
 								
 								Game.Cascade = 0
-
-// cheat
-Game.CollectedScore = Game.CollectedScore * 100
 
 								Game.AbsoluteScore = Game.AbsoluteScore + Game.CollectedScore
 								Game.CollectedScore = 0
