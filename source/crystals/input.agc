@@ -355,16 +355,16 @@ function GameInputDo(Game ref as TGame,Now as integer)
 			
 			if Game.IsSummary = TRUE
 				
-				if CheckInputStartStatePressed(Game.Joystick) = TRUE
-					SummarySelect(Game)
-				endif
-				
 				if CheckInputBackStatePressed(Game.Joystick)
 					AbortGame(Game)
 				endif
-					
-				if Game.IsNewHighScore = TRUE
-			
+
+				if Game.IsNewHighScore = TRUE and Game.Summary.IsOnlineWaiting = FALSE
+
+					if CheckInputStartStatePressed(Game.Joystick) = TRUE
+						SummarySelect(Game)
+					endif
+
 					if CheckInputLeftStateDown(Game.Joystick,Game.InputTimer,Game.Time) = TRUE
 						EnterNameMoveLeft(Game)
 					endif
@@ -380,8 +380,9 @@ function GameInputDo(Game ref as TGame,Now as integer)
 					if CheckInputDownStateDown(Game.Joystick,Game.InputTimer,Game.Time) = TRUE
 						EnterNameMoveDown(Game)
 					endif
-					
+
 				endif
+
 			endif
 			
 		endif

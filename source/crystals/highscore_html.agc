@@ -34,6 +34,9 @@ function HighScoreGetTableNameForCookie(Index as integer)
 		case TABLECASCADE
 			Value = "crystals_hs_table_cascade.json"
 		endcase
+		case TABLEONLINE
+			Value = "crystals_hs_table_online.json"
+		endcase
 	endselect
 	
 endfunction Value
@@ -42,16 +45,22 @@ endfunction Value
 //
 //----------------------------------------------------------------------
 
-function HighScoreTableSaveAsCookie(Table ref as THighScore[],TableIndex as integer)
+function HighScoreTableSaveAsCookie(Table ref as THighScore[],TableIndex as integer,OverWrite as integer)
 
-	local JSONToBase64String as string
+	local EncString as string
 	local TableName as string
 	
 	TableName = HighScoreGetTableNameForCookie(TableIndex)
-	JSONToBase64String = StringToBase64(Table.ToJSON())
 	
-	if Len(JSONToBase64String) < 4096 - Len(TableName)
-		SaveSharedVariable(TableName,JSONToBase64String)
+	if OverWrite = TRUE or LoadSharedVariable(TableName,"") = ""
+
+		EncString = HighScoreEncode(Table)
+	
+		if EncString <> ""
+			if Len(EncString) < 4096 - Len(TableName)
+				SaveSharedVariable(TableName,EncString)
+			endif
+		endif
 	endif
 
 endfunction
@@ -65,7 +74,7 @@ function HighScoreSaveAsCookie(HighScoreList ref as THighScoreList)
 	local i as integer
 	
 	for i = 0 to MAXHIGHSCORETABLE
-		HighScoreTableSaveAsCookie(HighScoreList.Score[i],i)
+		HighScoreTableSaveAsCookie(HighScoreList.Score[i],i,TRUE)
 	next i
 	
 endfunction
@@ -75,22 +84,20 @@ endfunction
 //----------------------------------------------------------------------
 
 function HighScoreTableLoadFromCookie(Table ref as THighScore[],TableIndex as integer)
-
-	local Base64JSONSString as string
+	
+	local EncString as string
 	local TableName as string
-	local JSONString as string
 	local Value as integer
 	
-	Value = FALSE
 	TableName = HighScoreGetTableNameForCookie(TableIndex)
-	Base64JSONSString = LoadSharedVariable(TableName,"")
-	if Base64JSONSString <> ""
-		JSONString = Base64StringToJSON(Base64JSONSString)
-		Table.Length = -1
-		Table.FromJSON(JSONString)
-		Value = TRUE
-	endif
+	EncString = LoadSharedVariable(TableName,"")
 	
+	Value = FALSE
+	
+	if EncString <> ""
+		Value = HighScoreDecode(Table,MAXHIGHSCOREITEMS,EncString)
+	endif
+
 endfunction Value
 
 //----------------------------------------------------------------------
@@ -102,25 +109,32 @@ function HighScoreLoadFromCookie(HighScoreList ref as THighScoreList)
 	local Table as THighScore[]
 	local i as integer
 	local Value as integer
-	local Index as integer
+	local Valid as integer
 	
 	HighScoreClear(HighScoreList)
 	Value = TRUE
 	
-	for i = 0 to MAXHIGHSCORETABLE	
-		Table.Length = -1
-		if HighScoreTableLoadFromCookie(Table,i) = TRUE
-			HighScoreList.Score.Insert(Table)
-			Index = HighScoreList.Score.Length
-			if HighScoreList.Score[Index].Length <> MAXHIGHSCOREITEMS
-				while HighScoreList.Score[Index].Length > MAXHIGHSCOREITEMS
-					HighScoreList.Score[Index].Remove(HighScoreList.Score[Index].Length)
-				endwhile
+		for i = 0 to MAXHIGHSCORETABLE
+
+			Table.Length = -1
+			
+			Valid = HighScoreTableLoadFromCookie(Table,i)
+			
+			if Valid = TRUE
+				if Table.Length <> MAXHIGHSCOREITEMS
+					Valid = FALSE
+				endif
 			endif
-		else
-			VALUE = FALSE
-		endif
-	next i
+			
+			if Valid = FALSE
+				Value = FALSE
+				HighScoreTableInit(Table,i)
+				HighScoreTableSaveAsCookie(Table,i,TRUE)
+			endif
+			
+			HighScoreList.Score.Insert(Table)
+
+		next i
 
 endfunction Value
 

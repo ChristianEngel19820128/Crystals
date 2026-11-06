@@ -25,38 +25,47 @@ endfunction
 
 function PurpleToken_Receive(Table ref as THighScore[][])
 
-	local i as integer
-	local k as integer
-	local code as integer
-	local Found as integer
+    local TempTable as THighScore[]
+    local Score as THighScore
+    local i as integer
+    local Count as integer
+    local Found as integer
 
-	local test1 as string
-	local test2 as integer
+    PT_listener()
+    Found = FALSE
 
-	PT_listener()
-	Found = FALSE
-	code = PT_getCode()
-	if code = _PT_ERROR_SUCCESS
-		if PT_scoresAvailable()
-			if Table.Length = MAXHIGHSCORETABLE
-				if Table[TABLEONLINE].Length = MAXHIGHSCOREITEMS
-					Found = TRUE
-					i = 0
-					while i <= MAXHIGHSCOREITEMS and i <= _PT.scores.Length
-						Table[TABLEONLINE,i].Name = Left(_PT.scores[i].player,MAXCHARS+1)
-						Table[TABLEONLINE,i].Score = _PT.scores[i].score
-						inc i
-					endwhile
-					if i <= MAXHIGHSCOREITEMS
-						for k = i to MAXHIGHSCOREITEMS
-							Table[TABLEONLINE,i].Name = "XXX"
-							Table[TABLEONLINE,i].Score = 0
-						next k
-					endif
-				endif
-			endif
-		endif
-	endif
+    if PT_getCode() = _PT_ERROR_SUCCESS
+        if PT_scoresAvailable()
+            if Table.Length = MAXHIGHSCORETABLE
+                if Table[TABLEONLINE].Length = MAXHIGHSCOREITEMS
+
+                    TempTable.Length = -1
+                    Count = _PT.scores.Length + 1
+
+                    if Count > MAXHIGHSCOREITEMS + 1
+                        Count = MAXHIGHSCOREITEMS + 1
+                    endif
+
+                    for i = 0 to MAXHIGHSCOREITEMS
+
+                        Score.Name = "XXX"
+                        Score.Score = 0
+
+                        if i < Count
+                            Score.Name = Left(_PT.scores[i].player,MAXCHARS+1)
+                            Score.Score = _PT.scores[i].score
+                        endif
+
+                        TempTable.Insert(Score)
+                    next i
+
+                    Table[TABLEONLINE] = TempTable
+                    Found = TRUE
+
+                endif
+            endif
+        endif
+    endif
 
 endfunction Found
 

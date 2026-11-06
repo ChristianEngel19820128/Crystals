@@ -28,6 +28,13 @@
 #constant REACTIONTIME 100
 #constant ANIMATINGTIMEOUT 250
 
+#constant DEFAULTSOUND 80
+#constant DEFAULTMUSIC 30
+
+#constant ONLINE_IDLE    0
+#constant ONLINE_WAITING 1
+#constant ONLINE_READY   2
+
 //----------------------------------------------------------------------
 //
 //----------------------------------------------------------------------
@@ -181,6 +188,10 @@ type THighScoreList
 	Score as THighScore[-1,-1]
 	TxtFieldsScore as TTxtHighScore[9]
 	
+	OnlineState as integer
+	OnlineRequestTime as integer
+	OnlineResult as integer
+
 endtype
 
 type TSummary
@@ -202,6 +213,8 @@ type TSummary
 	Level as integer
 	HighestCascade as integer
 	
+	IsOnlineWaiting as integer
+
 endtype
 
 type TGame

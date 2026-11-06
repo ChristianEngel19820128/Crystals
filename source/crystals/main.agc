@@ -37,8 +37,10 @@ SetVirtualResolution(vx,vy)
 
 #constant Device$ GetDeviceBaseName()
 
+
+
 If Device$ = "html5"
-	SetSyncRate(60,0)
+	SetVSync(1)
 else
 	SetSyncRate(120,0)
 endif
@@ -56,6 +58,7 @@ UseNewDefaultFonts(1)
 #include "def_game.agc"
 #include "def_strings.agc"
 #include "base64.agc"
+#include "HighScoreCodec.agc"
 #include "color.agc"
 #include "file.agc"
 #include "timer.agc"
@@ -75,14 +78,32 @@ UseNewDefaultFonts(1)
 #include "controls.agc"
 #include "input.agc"
 
-global debug
-debug = CreateText("")
-SetTextPosition(debug,10,vy-50)
-SetTextSize(debug,20)
+#constant maxdebug = 3
+global debug as integer[maxdebug]
+local i
+
+for i = 0 to maxdebug
+	debug[i] = CreateText("")
+	SetTextPosition(debug[i],10,vy-50-i*30)
+	SetTextSize(debug[i],24)
+next i
 
 local Game as TGame
-
 GameCreate(Game,cx,cy)
+
+local TimeDraw as integer
+local TimeSwap as integer
+TimeDraw = GetMilliseconds()
+TimeSwap = GetMilliseconds()
+
+local Text1 as integer
+local Text2 as integer
+Text1 = CreateText("")
+Text2 = CreateText("" + Chr(92))
+settextposition(text1,10,10)
+settextposition(text2,10,30)
+settextsize(text1,24)
+settextsize(text2,24)
 
 repeat
 	
@@ -95,11 +116,25 @@ repeat
 	
 	GameInputDo(Game,Game.Time.VirtualNow)
 	GameDo(Game)
-	GameDraw(Game)
+	HighScoreOnlineDo(Game.HighScore)
 	
-	Drawtext(debug)
-	Drawtext(Game.FPS)
-	
-	Swap()
+/*	If Device$ = "html5"
+		if TimeDraw + 12 < GetMilliseconds()
+			GameDraw(Game)
+			Drawtext(debug)
+			Drawtext(Game.FPS)
+			TimeDraw = GetMilliseconds()
+			Swap()
+		endif
+	else */
+		GameDraw(Game)
+
+		for i = 0 to maxdebug
+			//Drawtext(debug[i])
+		next i
+
+		Drawtext(Game.FPS)
+		Swap()
+	//endif
 	
 until GetESCPressed() = 1 and Game.IsHighScore = TRUE

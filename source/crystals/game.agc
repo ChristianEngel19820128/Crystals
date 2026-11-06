@@ -283,8 +283,8 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 
 	SoundInit(Game)
 
-	Game.SoundVol = 80
-	Game.MusicVol = 50
+	Game.SoundVol = DEFAULTSOUND
+	Game.MusicVol = DEFAULTMUSIC
 
 	if Game.TitleThemeID > 0
 		SetMusicVolumeOGG(Game.TitleThemeID,Game.MusicVol)
@@ -425,6 +425,13 @@ function GameDo(Game ref as TGame)
 	if Game.IsRunning = TRUE
 		if Game.IsPause = FALSE
 
+			if Game.IsLost = TRUE
+				if Game.CollectedScore > 0
+					Game.AbsoluteScore = Game.AbsoluteScore + Game.CollectedScore
+					Game.CollectedScore = 0
+				endif
+			endif
+
 			if Game.CollectedScore <> 0
 				Game.GUIAbsoluteScore = Game.AbsoluteScore
 				Game.GuiCollectedScore = Game.CollectedScore
@@ -467,7 +474,7 @@ function GameDo(Game ref as TGame)
 						Game.IsLost = TRUE
 						Game.IsSummary = TRUE
 						Game.Summary.IsInit = TRUE
-						Game.HighScore.IsNew = TRUE
+						Game.HighScore.IsNew = TRUE						
 					else
 						SoundPlay(Game.BlockDropSoundID,Game.SoundVol)
 						if TimeGet(Game.CurrentBlock.SetUpTime,Game.Time.VirtualNow) > 0
@@ -513,7 +520,7 @@ function GameDo(Game ref as TGame)
 								SetTextColor(Game.TxtCollectedScore,Color.Red,Color.Green,Color.Blue,Color.Alpha)
 							endif
 							Game.CollectedScore = Game.CollectedScore * Game.Cascade + 0.1 * (GemCount*Game.Level)^2 * Game.Cascade
-							
+
 						else
 						
 								if Game.Cascade > Game.HighestCascade
@@ -565,7 +572,7 @@ function GameDo(Game ref as TGame)
 		else
 			// pause
 		endif
-	else
+	else // = (GameIsRunning = FALSE)
 		
 		if Game.IsLost = FALSE
 			HighScoreAnimate(Game.HighScore,Game.Time.RealNow)
@@ -574,10 +581,25 @@ function GameDo(Game ref as TGame)
 				HighScoreAnimateReset(Game.HighScore)
 				Game.HighScore.Table = Game.Difficulty
 				SummaryEnterNameInit(Game,Game.Summary)
-				if HighScoreCheck(Game.HighScore,Game.Summary)
-					Game.IsNewHighScore = TRUE
+
+				Game.IsNewHighScore = HighScoreCheck(Game.HighScore,Game.Summary)
+				
+				if Game.Difficulty = DIFFICULTY_ULTRA
+					HighScoreOnlineStart(Game.HighScore)
+					Game.Summary.IsOnlineWaiting = TRUE
+				endif
+
+			endif
+
+			if Game.Summary.IsOnlineWaiting = TRUE
+				if Game.HighScore.OnlineState <> ONLINE_WAITING
+					if HighScoreCheckOnline(Game.HighScore,Game.Summary)
+						Game.IsNewHighScore = TRUE
+					endif
+					Game.Summary.IsOnlineWaiting = FALSE
 				endif
 			endif
+
 		endif
 		
 	endif
@@ -595,9 +617,11 @@ function GameDraw(Game ref as TGame)
 	local y as float
 	local i as integer
 	local vol as string
+	local Dots as integer
+	local LoadingText as string
 	
 	BackgroundDraw(Game.Background)
-		
+
 	if Game.IsRunning = TRUE
 		
 		if Game.IsPause = FALSE
@@ -707,64 +731,86 @@ function GameDraw(Game ref as TGame)
 		else
 			
 			if Game.IsLost = TRUE
-				SetTextString(Game.TxtSummaryScore,Str(Game.Summary.AbsoluteScore))
-				
-				select Game.Summary.Difficulty
-					case DIFFICULTY_ULTRA
-						SetTextString(Game.TextSummaryDifficulty,OUTPUT_ULTRA)
-					endcase
-					case DIFFICULTY_HARD
-						SetTextString(Game.TextSummaryDifficulty,OUTPUT_HARD)
-					endcase
-					case DIFFICULTY_ADVANCED
-						SetTextString(Game.TextSummaryDifficulty,OUTPUT_ADVANCED)
-					endcase
-					case DIFFICULTY_MEDIUM
-						SetTextString(Game.TextSummaryDifficulty,OUTPUT_MEDIUM)
-					endcase
-					case DIFFICULTY_EASY
-						SetTextString(Game.TextSummaryDifficulty,OUTPUT_EASY)
-					endcase
-				endselect
-				
-				SetTextString(Game.TxtSummaryLevel,Str(Game.Summary.Level))
-				SetTextString(Game.TxtSummaryGems,Str(Game.Summary.Gems))
-				SetTextString(Game.TxtSummaryCascade,Str(Game.Summary.HighestCascade))
-				
-				Drawtext(Game.TextSummaryScore)
-				Drawtext(Game.TextSummaryDifficulty)
-				Drawtext(Game.TxtSummaryScore)
-				Drawtext(Game.TextSummaryLevel)
-				Drawtext(Game.TxtSummaryLevel)
-				Drawtext(Game.TextSummaryGems)
-				Drawtext(Game.TxtSummaryGems)
-				Drawtext(Game.TextSummaryCascade)
-				Drawtext(Game.TxtSummaryCascade)
-				
-				if Game.IsNewHighScore = TRUE
+
+				if Game.Summary.AbsoluteScore > 0
+
+					SetTextString(Game.TxtSummaryScore,Str(Game.Summary.AbsoluteScore))
 					
-					for i = 0 to Game.TxtSummaryChar.Length
-						SetTextString(Game.TxtSummaryChar[i],Game.Summary.CharList[Game.Summary.Char[i]])
-						SetTextX(Game.TxtSummaryChar[i],Game.Summary.fcx-20*MAXCHARS/2+20*i)
-						DrawText(Game.TxtSummaryChar[i])
-					next i
+					select Game.Summary.Difficulty
+						case DIFFICULTY_ULTRA
+							SetTextString(Game.TextSummaryDifficulty,OUTPUT_ULTRA)
+						endcase
+						case DIFFICULTY_HARD
+							SetTextString(Game.TextSummaryDifficulty,OUTPUT_HARD)
+						endcase
+						case DIFFICULTY_ADVANCED
+							SetTextString(Game.TextSummaryDifficulty,OUTPUT_ADVANCED)
+						endcase
+						case DIFFICULTY_MEDIUM
+							SetTextString(Game.TextSummaryDifficulty,OUTPUT_MEDIUM)
+						endcase
+						case DIFFICULTY_EASY
+							SetTextString(Game.TextSummaryDifficulty,OUTPUT_EASY)
+						endcase
+					endselect
 					
-					if TimeGet(Game.TimerSummeryText,Game.Time.RealNow) > 0
-						if Game.SwitchSummeryText = TRUE
-							Game.SwitchSummeryText = FALSE
-						else
-							Game.SwitchSummeryText = TRUE
+					SetTextString(Game.TxtSummaryLevel,Str(Game.Summary.Level))
+					SetTextString(Game.TxtSummaryGems,Str(Game.Summary.Gems))
+					SetTextString(Game.TxtSummaryCascade,Str(Game.Summary.HighestCascade))
+					
+					Drawtext(Game.TextSummaryScore)
+					Drawtext(Game.TextSummaryDifficulty)
+					Drawtext(Game.TxtSummaryScore)
+					Drawtext(Game.TextSummaryLevel)
+					Drawtext(Game.TxtSummaryLevel)
+					Drawtext(Game.TextSummaryGems)
+					Drawtext(Game.TxtSummaryGems)
+					Drawtext(Game.TextSummaryCascade)
+					Drawtext(Game.TxtSummaryCascade)
+				
+				endif
+
+				if Game.IsNewHighScore = TRUE 
+					if Game.Summary.IsOnlineWaiting = TRUE
+					
+						Dots = 1 + mod(GetMilliseconds() / 333,3)
+						LoadingText = Left("***",Dots)
+						
+						if GetMilliseconds() - Game.HighScore.OnlineRequestTime > 200
+							SetTextString(Game.TextEnterName,LoadingText)
+							DrawText(Game.TextEnterName)
 						endif
-						TimeReset(Game.TimerSummeryText,Game.Time.RealNow)
+						
 					endif
+					if Game.Summary.IsOnlineWaiting = FALSE
 					
-					if Game.SwitchSummeryText = TRUE
-						SetTextX(Game.TxtSummerySelectChar,Game.Summary.fcx-20*MAXCHARS/2+20*Game.Summary.EnterCharIndex)
-						DrawText(Game.TxtSummerySelectChar)
+						if Game.Summary.AbsoluteScore > 0
+	
+							for i = 0 to Game.TxtSummaryChar.Length
+								SetTextString(Game.TxtSummaryChar[i],Game.Summary.CharList[Game.Summary.Char[i]])
+								SetTextX(Game.TxtSummaryChar[i],Game.Summary.fcx-20*MAXCHARS/2+20*i)
+								DrawText(Game.TxtSummaryChar[i])
+							next i
+							
+							if TimeGet(Game.TimerSummeryText,Game.Time.RealNow) > 0
+								if Game.SwitchSummeryText = TRUE
+									Game.SwitchSummeryText = FALSE
+								else
+									Game.SwitchSummeryText = TRUE
+								endif
+								TimeReset(Game.TimerSummeryText,Game.Time.RealNow)
+							endif
+							
+							if Game.SwitchSummeryText = TRUE
+								SetTextX(Game.TxtSummerySelectChar,Game.Summary.fcx-20*MAXCHARS/2+20*Game.Summary.EnterCharIndex)
+								DrawText(Game.TxtSummerySelectChar)
+							endif
+							
+							SetTextString(Game.TextEnterName,OUTPUT_ENTER_NAME)
+							Drawtext(Game.TextEnterName)
+						
+						endif
 					endif
-					
-					Drawtext(Game.TextEnterName)
-					
 				else
 					Drawtext(Game.TextStart)
 				endif
@@ -801,6 +847,8 @@ function GameDraw(Game ref as TGame)
 					endcase
 				endselect
 				
+				HighScoreSet(Game.HighScore)
+
 				for i = 0 to Game.Highscore.TxtFieldsScore.Length
 					Drawtext(Game.Highscore.TxtHighScore)
 					Drawtext(Game.Highscore.TxtTable)

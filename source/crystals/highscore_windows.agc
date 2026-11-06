@@ -45,7 +45,7 @@ endfunction Value
 //
 //----------------------------------------------------------------------
 
-function HighScoreTableSave(Table ref as THighScore[],TableIndex as integer)
+function HighScoreTableSave(Table ref as THighScore[],TableIndex as integer,OverWrite as integer)
 	
 	local File as TFilePath
 	
@@ -53,7 +53,13 @@ function HighScoreTableSave(Table ref as THighScore[],TableIndex as integer)
 	File.Name = HighScoreGetTableName(TableIndex)
 	
 	if FilePathSet(File) = TRUE
-		Table.Save(File.Name)
+		if OverWrite = TRUE
+			Table.Save(File.Name)
+		else
+			if GetFileExists(File.Name) = 0
+				Table.Save(File.Name)
+			endif
+		endif
 	endif
 	
 endfunction
@@ -67,7 +73,7 @@ function HighScoreSave(HighScoreList ref as THighScoreList)
 	local i as integer
 	
 	for i = 0 to MAXHIGHSCORETABLE
-		HighScoreTableSave(HighScoreList.Score[i],i)
+		HighScoreTableSave(HighScoreList.Score[i],i,TRUE)
 	next i
 
 endfunction
@@ -80,7 +86,7 @@ function HighScoreTableLoad(Table ref as THighScore[],TableName as integer)
 	
 	local File as TFilePath
 	local Value as integer
-	
+
 	File.Path = "/media"
 	File.Name = HighScoreGetTableName(TableName)
 	
@@ -102,30 +108,37 @@ endfunction Value
 //----------------------------------------------------------------------
 
 function HighScoreLoad(HighScoreList ref as THighScoreList)
-	
+
 	local Table as THighScore[]
 	local i as integer
 	local Value as integer
-	local Index as integer
+	local Valid as integer
 	
 	HighScoreClear(HighScoreList)
 	Value = TRUE
 	
-	for i = 0 to MAXHIGHSCORETABLE	
+	for i = 0 to MAXHIGHSCORETABLE
+
 		Table.Length = -1
-		if HighScoreTableLoad(Table,i) = TRUE
-			HighScoreList.Score.Insert(Table)
-			Index = HighScoreList.Score.Length
-			if HighScoreList.Score[Index].Length <> MAXHIGHSCOREITEMS
-				while HighScoreList.Score[Index].Length > MAXHIGHSCOREITEMS
-					HighScoreList.Score[Index].Remove(HighScoreList.Score[Index].Length)
-				endwhile
-			endif
-		else
-			VALUE = FALSE
-		endif
-	next i
 	
+		Valid = HighScoreTableLoad(Table,i)
+	
+		if Valid = TRUE
+			if Table.Length <> MAXHIGHSCOREITEMS
+				Valid = FALSE
+			endif
+		endif
+	
+		if Valid = FALSE
+			Value = FALSE
+			HighScoreTableInit(Table,i)
+			HighScoreTableSave(Table,i,TRUE)
+		endif
+	
+		HighScoreList.Score.Insert(Table)
+
+	next i
+
 endfunction Value
 
 //----------------------------------------------------------------------
