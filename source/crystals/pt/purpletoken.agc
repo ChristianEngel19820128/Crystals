@@ -279,3 +279,21 @@ function PT_ConnectionActive()
 endfunction 0
 
 
+// Cancels the current HTTP request and resets its response state
+function PT_cancelRequest()
+
+	if _PT.connection <> 0
+		closeHTTPConnection(_PT.connection)
+		deleteHTTPConnection(_PT.connection)
+		_PT.connection = 0
+	endif
+
+	_PT.code = -1
+	_PT.scoresRetrieved = FALSE
+
+endfunction
+
+
+
+
+
