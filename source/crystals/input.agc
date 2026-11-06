@@ -359,11 +359,13 @@ function GameInputDo(Game ref as TGame,Now as integer)
 					AbortGame(Game)
 				endif
 
-				if Game.IsNewHighScore = TRUE and Game.Summary.IsOnlineWaiting = FALSE
-
+				if Game.Summary.IsOnlineWaiting = FALSE
 					if CheckInputStartStatePressed(Game.Joystick) = TRUE
 						SummarySelect(Game)
 					endif
+				endif
+
+				if Game.IsNewHighScore = TRUE and Game.Summary.IsOnlineWaiting = FALSE
 
 					if CheckInputLeftStateDown(Game.Joystick,Game.InputTimer,Game.Time) = TRUE
 						EnterNameMoveLeft(Game)
