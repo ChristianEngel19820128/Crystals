@@ -25,29 +25,6 @@ function HighScoreOnlineRequestScore()
 	PurpleToken_Request()
 
 endfunction
-
-//----------------------------------------------------------------------
-//
-//----------------------------------------------------------------------
-
-function HighScoreOnlineReceiveScore(Table ref as THighScore[][])	
-
-	local Time as integer
-	local Found as integer
-
-	HighScoreOnlineRequestScore()
-
-	Time = GetMilliseconds()
-	Found = FALSE
-	while Time + 3000 > GetMilliseconds() and Found = FALSE
-		//sleep(35)
-		//swap()
-		if PurpleToken_Receive(Table) = TRUE
-			Found = TRUE
-		endif
-	endwhile
-
-endfunction Found
     
 //----------------------------------------------------------------------
 //
