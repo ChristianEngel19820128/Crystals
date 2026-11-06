@@ -10,7 +10,7 @@ Centuries later, the classic puzzle game *Columns* found its way onto arcade mac
 
 # Version
 
-The current version is 0.9995.
+The current version is 0.9996.
 
 # License
 
