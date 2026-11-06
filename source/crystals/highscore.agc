@@ -252,57 +252,27 @@ function HighScoreTableInsertName(Table ref as THighScore[],TableIndex as intege
 
 	local Value as integer
 
-	if TableIndex <> TABLEONLINE
+	Value = HighScoreCheckTable(Table,NewScore.Score)
+
+	if Value > -1
+
+		Table.Insert(NewScore,Value)
+		Table.Remove(Table.Length)
+
+		if TableIndex = TABLEONLINE
+			HighScoreOnlineSendScore(NewScore.Name,NewScore.Score)
+		endif
+
 		if Device$ = "windows"
-			//if HighScoreTableLoad(Table,TableIndex) = TRUE
-				Value = HighScoreCheckTable(Table,NewScore.Score)
-				if Value > -1
-					Table.Insert(NewScore,Value)
-					Table.Remove(Table.Length)
-					HighScoreTableSave(Table,TableIndex,TRUE)
-				endif
-			//endif
+			HighScoreTableSave(Table,TableIndex,TRUE)
 		endif
-	endif
-	
-	if TableIndex <> TABLEONLINE
+
 		if Device$ = "html5"
-			//if HighScoreTableLoadFromCookie(Table,TableIndex) = TRUE
-				Value = HighScoreCheckTable(Table,NewScore.Score)
-				if Value > -1
-					Table.Insert(NewScore,Value)
-					Table.Remove(Table.Length)
-					HighScoreTableSaveAsCookie(Table,TableIndex,TRUE)
-				endif
-			//endif
+			HighScoreTableSaveAsCookie(Table,TableIndex,TRUE)
 		endif
+
 	endif
 
-	if TableIndex = TABLEONLINE
-		if Device$ = "windows"
-			//if HighScoreTableLoad(Table,TableIndex) = TRUE
-				Value = HighScoreCheckTable(Table,NewScore.Score)
-				if Value > -1
-					Table.Insert(NewScore,Value)
-					Table.Remove(Table.Length)
-					HighScoreOnlineSendScore(NewScore.Name,NewScore.Score)
-					HighScoreTableSave(Table,TableIndex,TRUE)
-				endif
-			//endif
-		endif
-		if Device$ = "html5"
-			//if HighScoreTableLoadFromCookie(Table,TableIndex) = TRUE
-				Value = HighScoreCheckTable(Table,NewScore.Score)
-				if Value > -1
-					Table.Insert(NewScore,Value)
-					Table.Remove(Table.Length)
-					HighScoreOnlineSendScore(NewScore.Name,NewScore.Score)
-					HighScoreTableSaveAsCookie(Table,TableIndex,TRUE)
-				endif
-			//endif
-		endif
-	endif
-				
 endfunction Value
 
 //----------------------------------------------------------------------

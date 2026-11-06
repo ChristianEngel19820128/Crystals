@@ -3,6 +3,27 @@
 //
 //----------------------------------------------------------------------
 
+#CONSTANT PURPLETOKEN_SEND_IDLE 0
+#CONSTANT PURPLETOKEN_SEND_WAITING 1
+#CONSTANT PURPLETOKEN_SEND_READY 2
+#CONSTANT PURPLETOKEN_SEND_ERROR 3
+
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+
+type TPurpleTokenSend
+	State as integer
+	Time as integer
+	Result as integer
+endtype
+
+global PurpleTokenSend as TPurpleTokenSend
+
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+
 function PurpleToken_Init()
 
 	PT_initialize('40e1f1dc7624289738d4a147dea1770a8d859ab2', 'pizza shakes')
@@ -13,59 +34,37 @@ endfunction
 //
 //----------------------------------------------------------------------
 
-function PurpleToken_Request()
+function PurpleToken_Request(MaxItems as integer)
 
-	PT_requestScores(MAXHIGHSCOREITEMS+1,0,0)
+	local Started as integer
 
-endfunction
+	Started = FALSE
+
+	if PT_ConnectionActive() = FALSE
+
+		PT_requestScores(MaxItems,0,0)
+		Started = TRUE
+
+	endif
+
+endfunction Started
     
 //----------------------------------------------------------------------
 //
 //----------------------------------------------------------------------
+function PurpleToken_Receive()
 
-function PurpleToken_Receive(Table ref as THighScore[][])
-
-    local TempTable as THighScore[]
-    local Score as THighScore
-    local i as integer
-    local Count as integer
-    local Found as integer
-
-    PT_listener()
-    Found = FALSE
-
-    if PT_getCode() = _PT_ERROR_SUCCESS
-        if PT_scoresAvailable()
-            if Table.Length = MAXHIGHSCORETABLE
-                if Table[TABLEONLINE].Length = MAXHIGHSCOREITEMS
-
-                    TempTable.Length = -1
-                    Count = _PT.scores.Length + 1
-
-                    if Count > MAXHIGHSCOREITEMS + 1
-                        Count = MAXHIGHSCOREITEMS + 1
-                    endif
-
-                    for i = 0 to MAXHIGHSCOREITEMS
-
-                        Score.Name = "XXX"
-                        Score.Score = 0
-
-                        if i < Count
-                            Score.Name = Left(_PT.scores[i].player,MAXCHARS+1)
-                            Score.Score = _PT.scores[i].score
-                        endif
-
-                        TempTable.Insert(Score)
-                    next i
-
-                    Table[TABLEONLINE] = TempTable
-                    Found = TRUE
-
-                endif
-            endif
-        endif
-    endif
+	local Found as integer
+	
+	Found = FALSE
+	
+	PT_listener()
+	
+	if PT_getCode() = _PT_ERROR_SUCCESS
+		if PT_scoresAvailable() = TRUE
+			Found = TRUE
+		endif
+	endif
 
 endfunction Found
 
@@ -75,17 +74,62 @@ endfunction Found
 
 function PurpleToken_Send(PlayerName as string,Score as integer)
 
-	local Time as integer
-	local code as integer
+	local Started as integer
 
-	if Len(PlayerName) <= MAXCHARS+1
-		PT_submitScore(PlayerName,Score)
-		code = -1
-		while Time + 3000 > GetMilliseconds() and code = -1
-			sleep(35)
-			PT_listener()
-			code = PT_getCode()
-		endwhile
+	Started = FALSE
+
+	if PurpleTokenSend.State <> PURPLETOKEN_SEND_WAITING
+		if PT_ConnectionActive() = FALSE
+			if Len(PlayerName) <= 32
+
+				PT_submitScore(PlayerName,Score)
+
+				PurpleTokenSend.Time = GetMilliseconds()
+				PurpleTokenSend.Result = -1
+				PurpleTokenSend.State = PURPLETOKEN_SEND_WAITING
+
+				Started = TRUE
+
+			endif
+		endif
+	endif
+
+endfunction Started
+
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+
+function PurpleToken_SendDo()
+
+	local Code as integer
+
+	if PurpleTokenSend.State = PURPLETOKEN_SEND_WAITING
+
+		PT_listener()
+
+		Code = PT_getCode()
+
+		if Code <> -1
+
+			PurpleTokenSend.Result = Code
+
+			if Code = _PT_ERROR_SUCCESS
+				PurpleTokenSend.State = PURPLETOKEN_SEND_READY
+			else
+				PurpleTokenSend.State = PURPLETOKEN_SEND_ERROR
+			endif
+
+		else
+
+			if GetMilliseconds() - PurpleTokenSend.Time >= 3000
+				PT_cancelRequest()
+				PurpleTokenSend.Result = -1
+				PurpleTokenSend.State = PURPLETOKEN_SEND_ERROR
+			endif
+
+		endif
+
 	endif
 
 endfunction

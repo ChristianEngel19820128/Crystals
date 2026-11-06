@@ -528,8 +528,13 @@ function GameDo(Game ref as TGame)
 								endif
 								
 								Game.Cascade = 0
+
+// cheat
+Game.CollectedScore = Game.CollectedScore * 100
+
 								Game.AbsoluteScore = Game.AbsoluteScore + Game.CollectedScore
 								Game.CollectedScore = 0
+
 								SetTextColor(Game.TxtCascade,255,255,255,255)
 								SetTextColor(Game.TxtCollectedScore,255,255,255,255)
 								
