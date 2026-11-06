@@ -137,7 +137,7 @@ settextstring(debug[3],"OnlineState "+str(Game.HighScore.OnlineState))
 		GameDraw(Game)
 
 		for i = 0 to maxdebug
-			Drawtext(debug[i])
+			//Drawtext(debug[i])
 		next i
 
 		Drawtext(Game.FPS)
