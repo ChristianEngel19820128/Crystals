@@ -279,7 +279,7 @@ function GameCreate(Game ref as TGame,cx as float,cy as float)
 	SetTextBold(Game.TxtSummerySelectChar,1)
 	SetTextAlignment(Game.TxtSummerySelectChar,1)
 	
-	TimeSet(Game.ScoreTimer,100,1)
+	TimeSet(Game.ScoreTimer,60,1)
 
 	SoundInit(Game)
 
@@ -397,6 +397,8 @@ function GameInit(Game ref as TGame)
 	Game.ExplodeInstanceID = 0
 	Game.LevelUpInstanceID = 0
 
+	Game.ScoreSoundCounter = 0
+
 endfunction
 
 //----------------------------------------------------------------------
@@ -458,30 +460,33 @@ function GameDo(Game ref as TGame)
 				// Keine neuen Sammelpunkte: Punkte zum Gesamtscore hochzaehlen.
 				if TimeGet(Game.ScoreTimer,Game.Time.VirtualNow)
 					TimeReset(Game.ScoreTimer,Game.Time.VirtualNow)
+				
 					if Game.GuiCollectedScore > 0
 						ScoreProgress = 1.0-Game.GuiCollectedScore*1.0/Game.GuiMaxCollectedScore
 						ScoreCurve = 3.0*ScoreProgress/(1.0+2.0*ScoreProgress)
-						
+				
 						ScoreRate = 0.85+0.15*ScoreCurve
 						ScoreVol = Game.SoundVol*0.4
-						
-						if GetSoundInstancePlaying(Game.ScoreInstanceID) = TRUE
-							SetSoundInstanceVolume(Game.ScoreInstanceID,Game.SoundVol*0.2)
+				
+						Game.ScoreSoundCounter = Game.ScoreSoundCounter + 1
+				
+						// Nur jeden zweiten Zaehlschritt vertonen.
+						if mod(Game.ScoreSoundCounter,2) = 1
+							Game.ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,ScoreRate,ScoreVol)
 						endif
-						
-						Game.ScoreInstanceID = SoundPlayPitched(Game.ScoreSoundID,ScoreRate,ScoreVol)
 					endif
-					if Game.GuiCollectedScore > 9
-						ScoreAdd = ceil(Game.GuiCollectedScore*(0.1+0.4*(1.0-ScoreCurve)))
-					
+				
+					// Punkte bei JEDEM Timer-Ereignis uebertragen.
+					if Game.GuiCollectedScore > Game.GuiMaxCollectedScore * 0.1
+						ScoreAdd = ceil(Game.GuiCollectedScore*(0.1+0.6*(1.0-ScoreCurve)))
+				
 						if ScoreAdd > Game.GuiCollectedScore
 							ScoreAdd = Game.GuiCollectedScore
 						endif
-					
+				
 						Game.GuiAbsoluteScore = ScoreAddSafe(Game.GuiAbsoluteScore,ScoreAdd)
 						Game.GuiCollectedScore = Game.GuiCollectedScore - ScoreAdd
 					else
-						// Letzte Restpunkte direkt uebernehmen.
 						Game.GuiAbsoluteScore = ScoreAddSafe(Game.GuiAbsoluteScore,Game.GuiCollectedScore)
 						Game.GuiCollectedScore = 0
 					endif

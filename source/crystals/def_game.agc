@@ -320,6 +320,7 @@ type TGame
 	SoundVol as integer
 	MusicVol as integer
 	SelectSound as integer
+	ScoreSoundCounter as integer
 
 	TextSound as integer
 	TextSoundVol as integer

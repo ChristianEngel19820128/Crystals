@@ -10,5 +10,6 @@ Sound and music is disabled until files found.
 - sndmenu.wav
 - sndmenuselect.wav
 - sndscore.wav
+- sndfinal.wav
 
 - *.ogg
