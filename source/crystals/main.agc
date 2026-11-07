@@ -124,12 +124,6 @@ repeat
 		PurpleTokenSend.State = PURPLETOKEN_SEND_IDLE
 	endif
 
-settextstring(debug[0],"State"+str(PurpleTokenSend.State))
-settextstring(debug[1],"Time"+str(PurpleTokenSend.Time))
-settextstring(debug[2],"Result "+str(PurpleTokenSend.Result))
-settextstring(debug[3],"OnlineState "+str(Game.HighScore.OnlineState))
-
-
 /*	If Device$ = "html5"
 		if TimeDraw + 12 < GetMilliseconds()
 			GameDraw(Game)
@@ -142,7 +136,7 @@ settextstring(debug[3],"OnlineState "+str(Game.HighScore.OnlineState))
 		GameDraw(Game)
 
 		for i = 0 to maxdebug
-			//Drawtext(debug[i])
+			Drawtext(debug[i])
 		next i
 
 		Drawtext(Game.FPS)

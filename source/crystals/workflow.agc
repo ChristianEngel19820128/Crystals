@@ -115,17 +115,16 @@ endfunction
 //
 //----------------------------------------------------------------------
 
-function DifficultySelect(Game ref as TGame,Now as integer)
+function DifficultySelect(Game ref as TGame)
 
 	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
 
-	BlockGenerate(Game.CurrentBlock.Block,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
-	BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)	
-	MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
+	Game.PendingMagicBlocks = BlockGenerate(Game.CurrentBlock.Block,Game.ProtoCrystalList,Game.Difficulty,Game.Level,Game.PendingMagicBlocks)
+	Game.PendingMagicBlocks = BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level,Game.PendingMagicBlocks)
+	MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow,Game.Level)
 
 	Game.IsRunning = TRUE
 	Game.IsBlockMoving = TRUE
-	TimeReset(Game.CurrentBlock.MoveTime,Now)
 	Game.IsDifficultySelect = FALSE
 
 endfunction

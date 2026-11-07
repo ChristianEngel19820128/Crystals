@@ -79,20 +79,21 @@ FILE_26=workflow.agc;-1
 
 [files]
 FILE_NAME_0=0;block.agc;0;0
-FILE_NAME_1=0;def_game.agc;215;1
+FILE_NAME_1=0;def_game.agc;240;1
 FILE_NAME_2=0;def_strings.agc;11;2
-FILE_NAME_3=0;game.agc;530;3
-FILE_NAME_4=0;highscore.agc;231;4
+FILE_NAME_3=1;game.agc;582;3
+FILE_NAME_4=0;highscore.agc;281;4
 FILE_NAME_5=0;HighScoreCodec.agc;124;5
 FILE_NAME_6=0;highscore_html.agc;76;6
-FILE_NAME_7=0;highscore_online.agc;83;7
+FILE_NAME_7=0;highscore_online.agc;46;7
 FILE_NAME_8=0;highscore_windows.agc;88;8
-FILE_NAME_9=0;input.agc;364;9
-FILE_NAME_10=0;main.agc;132;10
-FILE_NAME_11=1;pt%2Fpt_interface.agc;25;11
-FILE_NAME_12=0;pt%2Fpurpletoken.agc;256;12
-FILE_NAME_13=0;summary.agc;90;13
-FILE_NAME_14=0;workflow.agc;195;14
+FILE_NAME_9=0;input.agc;363;9
+FILE_NAME_10=0;main.agc;121;10
+FILE_NAME_11=0;pt%2Fpt_interface.agc;9;11
+FILE_NAME_12=0;pt%2Fpurpletoken.agc;299;12
+FILE_NAME_13=0;sound.agc;62;13
+FILE_NAME_14=0;summary.agc;204;14
+FILE_NAME_15=0;workflow.agc;179;15
 
 [watchvariables]
 watch_variable=@Version;

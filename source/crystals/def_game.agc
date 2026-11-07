@@ -3,6 +3,12 @@
 
 #constant FIELDSIZE 42
 
+#CONSTANT FIELD_WIDTH 7
+#CONSTANT FIELD_HEIGHT 15
+
+#CONSTANT FIELD_MAX_X 6
+#CONSTANT FIELD_MAX_Y 14
+
 #constant MOVE_TIMESPAN 10
 #constant MOVE_RANGE 10
 
@@ -140,7 +146,7 @@ endtype
 
 type TField
 	
-	Array as TCrystal[6,14]
+	Array as TCrystal[FIELD_MAX_X,FIELD_MAX_Y]
 	Position as TPosition
 	Position1 as TPosition
 	Position2 as TPosition
@@ -245,6 +251,8 @@ type TGame
 	ProtoCrystalList as TProtoCrystalList
 	ProtoBlock as TProtoBlock
 	
+	PendingMagicBlocks as integer
+
 	Explosion as TExplosion
 	
 	NextBlock as TBlock

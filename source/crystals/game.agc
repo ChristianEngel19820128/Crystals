@@ -365,9 +365,15 @@ function GameInit(Game ref as TGame)
 	
 	Game.NewLevel = 1
 	Game.LastLevel = 1
+
+	Game.PendingMagicBlocks = 0
 	
 	MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
-	
+
+// cheat immer auskommentieren
+// Game.AbsoluteScore = MAX_SCORE
+// Game.GuiAbsoluteScore = Game.AbsoluteScore
+
 	SetTextString(Game.TxtGems,Str(Game.Gems))
 	SetTextString(Game.TxtLevel,Str(Game.Level))
 	
@@ -413,6 +419,7 @@ endfunction
 //
 //----------------------------------------------------------------------
 
+
 function GameDo(Game ref as TGame)
 	
 	local CountSteps as integer
@@ -429,9 +436,11 @@ function GameDo(Game ref as TGame)
 	local TempScore as float
 	local SafePoints as integer
 
+	// Aktive Spielrunde oder Menue/Spielende bearbeiten.
 	if Game.IsRunning = TRUE
 		if Game.IsPause = FALSE
 
+			// Bei Spielverlust noch offene Sammelpunkte uebernehmen.
 			if Game.IsLost = TRUE
 				if Game.CollectedScore > 0
 					Game.AbsoluteScore = ScoreAddSafe(Game.AbsoluteScore,Game.CollectedScore)
@@ -440,11 +449,13 @@ function GameDo(Game ref as TGame)
 
 			endif
 
+			// Punkteanzeige aktualisieren oder den Rest animiert uebertragen.
 			if Game.CollectedScore <> 0
 				Game.GUIAbsoluteScore = Game.AbsoluteScore
 				Game.GuiCollectedScore = Game.CollectedScore
 				Game.GuiMaxCollectedScore = Game.CollectedScore
 			else
+				// Keine neuen Sammelpunkte: Punkte zum Gesamtscore hochzaehlen.
 				if TimeGet(Game.ScoreTimer,Game.Time.VirtualNow)
 					TimeReset(Game.ScoreTimer,Game.Time.VirtualNow)
 					if Game.GuiCollectedScore > 0
@@ -470,28 +481,35 @@ function GameDo(Game ref as TGame)
 						Game.GuiAbsoluteScore = ScoreAddSafe(Game.GuiAbsoluteScore,ScoreAdd)
 						Game.GuiCollectedScore = Game.GuiCollectedScore - ScoreAdd
 					else
+						// Letzte Restpunkte direkt uebernehmen.
 						Game.GuiAbsoluteScore = ScoreAddSafe(Game.GuiAbsoluteScore,Game.GuiCollectedScore)
 						Game.GuiCollectedScore = 0
 					endif
 				endif
 			endif
 
+			// Fallender Block oder Spielfeld-/Kaskadenverarbeitung.
 			if Game.IsBlockMoving = TRUE
 				
 				if MovebleBlockCollide(Game.CurrentBlock,Game.Field) = FALSE
+					// Kein Hindernis erkannt: Block bewegen und Setzzeit zuruecksetzen.
 					CountSteps = MovebleBlockMoveDown(Game.CurrentBlock,Game.Field,Game.Time.VirtualNow)
 					TimeReset(Game.CurrentBlock.SetUpTime,Game.Time.VirtualNow)
 					if Game.CurrentBlock.IsFast
+						// Schnellfallbonus fuer zurueckgelegte Schritte.
 						Game.CollectedScore = ScoreAddSafe(Game.CollectedScore,Ceil(CountSteps/10))
 					endif
 				else
+					// Kollision erkannt: Spielfeldgrenze oder regulare Ablage.
 					if MovebleBlockOutOfBounds(Game.CurrentBlock) = TRUE
+						// Block kann nicht abgelegt werden: Spiel verloren.
 						Game.IsRunning = FALSE
 						Game.IsLost = TRUE
 						Game.IsSummary = TRUE
 						Game.Summary.IsInit = TRUE
 						Game.HighScore.IsNew = TRUE						
 					else
+						// Block liegt auf: nach Ablauf der Setzzeit im Feld fixieren.
 						SoundPlay(Game.BlockDropSoundID,Game.SoundVol)
 						if TimeGet(Game.CurrentBlock.SetUpTime,Game.Time.VirtualNow) > 0
 							BlockCopyToField(Game.CurrentBlock,Game.Field)
@@ -501,12 +519,16 @@ function GameDo(Game ref as TGame)
 				endif
 				
 			else
+				// Kein beweglicher Block: Feld auffuellen, Kombinationen suchen
+				// und gegebenenfalls Explosionen oder neue Bloecke vorbereiten.
 				
 				if Game.IsFieldExploding = FALSE
+					// Nur weitermachen, wenn keine Kristalle mehr nachfallen.
 					if FieldDropCrystals(Game.Field) = FALSE
 						
 						GemCount = FieldCheckAll(Game.Field)
 						if GemCount > 2
+							// Kombination gefunden: Fortschritt, Explosion und Punkte.
 							Game.Gems = Game.Gems + GemCount
 							Game.NewLevel = Floor(Game.Gems/(9+Ceil(Game.Level*0.25))) + 1
 							if Game.NewLevel > Game.Level
@@ -532,6 +554,7 @@ function GameDo(Game ref as TGame)
 
 							Game.Cascade = Game.Cascade +1
 							if Game.Cascade > 1
+								// Kaskade hervorheben: zufaellige Textfarben.
 								ColorSet(Color,0,0,0,255)
 								GetRandomColor(Color)
 								SetTextColor(Game.TxtCascade,Color.Red,Color.Green,Color.Blue,Color.Alpha)
@@ -540,7 +563,8 @@ function GameDo(Game ref as TGame)
 								SetTextColor(Game.TxtCollectedScore,Color.Red,Color.Green,Color.Blue,Color.Alpha)
 							endif
 
-							TempScore = Game.CollectedScore * 1.0 * Game.Cascade + 0.1 * (GemCount * 1.0 * Game.Level)^2 * Game.Cascade
+							// Kaskadenbonus berechnen und gegen Integer-Ueberlauf absichern.
+							TempScore = Game.CollectedScore * 0.333 * Game.Cascade + 0.1 * (GemCount * 1.0 * Game.Level)^2 * Game.Cascade
 							
 							if TempScore >= MAX_SCORE
 								SafePoints = MAX_SCORE
@@ -555,75 +579,89 @@ function GameDo(Game ref as TGame)
 							Game.CollectedScore = ScoreAddSafe(Game.CollectedScore,SafePoints)
 
 						else
+							// Keine weitere Kombination: Kaskade abschliessen.
 						
-								if Game.Cascade > Game.HighestCascade
-									Game.HighestCascade = Game.Cascade
-								endif
-								
-								Game.Cascade = 0
+							if Game.Cascade > Game.HighestCascade
+								Game.HighestCascade = Game.Cascade
+							endif
+							
+							Game.Cascade = 0
 
-								Game.AbsoluteScore = ScoreAddSafe(Game.AbsoluteScore,Game.CollectedScore)
-								Game.CollectedScore = 0
+							// Gesammelte Punkte zum Gesamtscore addieren.
+							Game.AbsoluteScore = ScoreAddSafe(Game.AbsoluteScore,Game.CollectedScore)
+							Game.CollectedScore = 0
 
-								if Game.AbsoluteScore = MAX_SCORE
-									Game.IsRunning = FALSE
-									Game.IsLost = TRUE
-									Game.IsSummary = TRUE
-									Game.Summary.IsInit = TRUE
-									Game.HighScore.IsNew = TRUE
-									Game.IsMaxScore = TRUE
-									SoundPlay(Game.FinalSoundID,Game.SoundVol)
-								endif
+							if Game.AbsoluteScore = MAX_SCORE
+								// Jackpot: Runde beenden und Highscore vorbereiten.
+								Game.IsRunning = FALSE
+								Game.IsLost = TRUE
+								Game.IsSummary = TRUE
+								Game.Summary.IsInit = TRUE
+								Game.HighScore.IsNew = TRUE
+								Game.IsMaxScore = TRUE
+								SoundPlayPitched(Game.FinalSoundID,0.5,Game.SoundVol)
+							endif
 
-								SetTextColor(Game.TxtCascade,255,255,255,255)
-								SetTextColor(Game.TxtCollectedScore,255,255,255,255)
-								
-								if Game.IsMaxScore = FALSE
-									If Game.NewLevel > Game.LastLevel
-										Rows = Floor(Game.NewLevel / 10.0) - Floor(Game.LastLevel / 10.0)
-										if Rows > 0
-											for i = 1 to Rows
-												if FieldLineCreateBottom(Game.Field,Game.ProtoCrystalList,Game.Difficulty) = FALSE
-													Game.IsRunning = FALSE
-													Game.IsLost = TRUE
-													Game.Summary.IsInit = TRUE
-													Game.HighScore.IsNew = TRUE
-												else
-													Game.LastLevel = Game.NewLevel
-												endif
-											next i
-										else
-											Game.LastLevel = Game.NewLevel
-										endif
+							// Kaskadenfarben zuruecksetzen.
+							SetTextColor(Game.TxtCascade,255,255,255,255)
+							SetTextColor(Game.TxtCollectedScore,255,255,255,255)
+							
+							if Game.IsMaxScore = FALSE
+								// Ohne Jackpot: Levelwechsel oder naechsten Block bearbeiten.
+								If Game.NewLevel > Game.LastLevel
+									// Levelwechsel: neue Zehnergrenzen ermitteln.
+									Rows = Floor(Game.NewLevel / 10.0) - Floor(Game.LastLevel / 10.0)
+									if Rows > 0
+										// Fuer jede ueberschrittene Zehnergrenze eine Reihe.
+										for i = 1 to Rows
+											if FieldLineCreateBottom(Game.Field,Game.ProtoCrystalList,Game.Difficulty) = FALSE
+												// Neue Reihe passt nicht mehr: Spiel verloren.
+												Game.IsRunning = FALSE
+												Game.IsLost = TRUE
+												Game.Summary.IsInit = TRUE
+												Game.HighScore.IsNew = TRUE
+											else
+												// Reihe erfolgreich erzeugt: Levelstand uebernehmen.
+												Game.LastLevel = Game.NewLevel
+											endif
+										next i
+										Game.PendingMagicBlocks = Game.PendingMagicBlocks + Rows
 									else
-										
-										Game.CurrentBlock.Block = Game.NextBlock
-										BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
-										MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
-										Game.IsBlockMoving = TRUE
-										Game.CurrentBlock.IsFast = FALSE
-										MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
-									
+										// Levelwechsel ohne neue Zehnergrenze.
+										Game.LastLevel = Game.NewLevel
 									endif
+								else
+									// Kein ausstehender Levelwechsel: naechsten Block starten.
+									Game.CurrentBlock.Block = Game.NextBlock
+									Game.PendingMagicBlocks = BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level,Game.PendingMagicBlocks)
+									MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow,Game.Level)
+									Game.IsBlockMoving = TRUE
+
 								endif
+							endif
 							
 						endif
 					endif
 				else
+					// Explosion laeuft: Animation fortsetzen.
 					if FieldExplosionAnimate(Game.Field,Game.Explosion,Game.Time.VirtualNow) = FALSE
+						// Animation abgeschlossen: Feld wieder bearbeiten.
 						Game.IsFieldExploding = FALSE
 					endif
 				endif
 			endif
 		
 		else
-			// pause
+			// Spiel pausiert: keine aktive Spiellogik ausfuehren.
 		endif
-	else // = (GameIsRunning = FALSE)
+	else
+		// Keine aktive Spielrunde: Menue/Highscore oder Spielende.
 		
 		if Game.IsLost = FALSE
+			// Kein Spielverlust: Highscore-Tabelle animieren.
 			HighScoreAnimate(Game.HighScore,Game.Time.RealNow)
 		else
+			// Spiel verloren: Zusammenfassung und Highscore vorbereiten.
 			if Game.Summary.IsInit = TRUE
 				HighScoreAnimateReset(Game.HighScore)
 				Game.HighScore.Table = Game.Difficulty
@@ -632,6 +670,7 @@ function GameDo(Game ref as TGame)
 				Game.IsNewHighScore = HighScoreCheck(Game.HighScore,Game.Summary)
 				
 				if Game.Difficulty = DIFFICULTY_ULTRA
+					// Online-Highscore fuer ULTRA asynchron anfordern.
 					HighScoreOnlineStart(Game.HighScore)
 					Game.Summary.IsOnlineWaiting = TRUE
 				endif
@@ -639,6 +678,7 @@ function GameDo(Game ref as TGame)
 			endif
 
 			if Game.Summary.IsOnlineWaiting = TRUE
+				// Auf das Ergebnis der Online-Highscore-Abfrage warten.
 				if Game.HighScore.OnlineState <> ONLINE_WAITING
 					if HighScoreCheckOnline(Game.HighScore,Game.Summary)
 						Game.IsNewHighScore = TRUE
@@ -648,6 +688,8 @@ function GameDo(Game ref as TGame)
 			endif
 
 			if Game.IsMaxScore = TRUE
+				// Jackpot: nach Abschluss der Initialisierung und Online-Abfrage
+				// die Highscore-Eingabe automatisch bestaetigen.
 				if Game.Summary.IsInit = FALSE
 					if Game.Summary.IsOnlineWaiting = FALSE
 						SummarySelect(Game)
@@ -660,6 +702,7 @@ function GameDo(Game ref as TGame)
 	endif
 	
 endfunction
+
 
 //----------------------------------------------------------------------
 //

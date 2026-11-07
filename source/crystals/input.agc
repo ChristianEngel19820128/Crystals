@@ -328,7 +328,7 @@ function GameInputDo(Game ref as TGame,Now as integer)
 			endif
 			
 			if CheckInputStartStatePressed(Game.Joystick) = TRUE
-				DifficultySelect(Game,Now)
+				DifficultySelect(Game)
 			endif
 			
 			if CheckInputBackStatePressed(Game.Joystick)

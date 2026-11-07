@@ -78,37 +78,38 @@ endfunction
 //
 //----------------------------------------------------------------------
 
-function BlockGenerate(Block ref as TBlock,List ref as TProtoCrystalList,Difficulty as integer,Level as integer)
-	
+function BlockGenerate(Block ref as TBlock,List ref as TProtoCrystalList,Difficulty as integer,Level as integer,PendingMagicBlocks as integer)
+
 	local i as integer
-	
+
+	// Normale Kristalle erzeugen.
 	for i = 0 to Block.Array.Length
 		Block.Array[i].ProtoCrystalIndex = random(0,List.Array.Length-1-(MAXDIFFICULTY-Difficulty+1))
 	next i
-	
-	select random(0,1)
-		
-		case 0
+
+	// Vorgemerkten Magic-Block ausgeben.
+	if PendingMagicBlocks > 0 and random(0,100) < 25
+
+		for i = 0 to Block.Array.Length
+			Block.Array[i].ProtoCrystalIndex = MAGICINDEX
+		next i
+
+		PendingMagicBlocks = PendingMagicBlocks - 1
+
+	else
+
+		// Regenbogenkristalle weiterhin zufaellig erzeugen.
+		if random(0,1) = 0
 			for i = 0 to Block.Array.Length
 				if random(0,100) < 13
 					Block.Array[i].ProtoCrystalIndex = RAINBOWINDEX
 				endif
 			next i
-		endcase
-		
-		case 1
-			if mod(Level,10) = 0 and Level > 1
-				if random(0,100) < 13
-					for i = 0 to Block.Array.Length
-						Block.Array[i].ProtoCrystalIndex = MAGICINDEX
-					next i
-				endif
-			endif
-		endcase
-		
-	endselect
-	
-endfunction
+		endif
+
+	endif
+
+endfunction PendingMagicBlocks
 
 //----------------------------------------------------------------------
 //
@@ -136,7 +137,7 @@ endfunction
 //
 //----------------------------------------------------------------------
 
-function MovebleBlockInit(MovebleBlock ref as TMovebleBlock,Now as integer)
+function MovebleBlockInit(MovebleBlock ref as TMovebleBlock,Now as integer,Level as integer)
 	
 	MovebleBlock.BoardPosition = MovebleBlock.BasePosition
 	MovebleBlock.FieldPosition.x = 3
@@ -147,6 +148,7 @@ function MovebleBlockInit(MovebleBlock ref as TMovebleBlock,Now as integer)
 	TimeReset(MovebleBlock.MoveTime,Now)
 	
 	MovebleBlock.IsFast = FALSE
+	MovebleBlockSpeedSet(MovebleBlock,Level)
 	
 endfunction
 
@@ -241,15 +243,19 @@ endfunction
 
 function MovebleBlockSpeedSet(MovebleBlock ref as TMovebleBlock,Level as integer)
 
-	MovebleBlock.MoveSpeed = 0.025 + Floor(Level/10)*0.01 + (Level - Floor(Level/10)*10) * 0.025
+	local BaseLevel as integer
+
+	BaseLevel = Level
+	if BaseLevel > 100
+		BaseLevel = 100
+	endif
+
+	MovebleBlock.MoveSpeed = 0.025 + Floor(BaseLevel/10.0)*0.01 + mod(Level,10)*0.025
 	
 	if MovebleBlock.IsFast = TRUE
 		MovebleBlock.MoveSpeed = MovebleBlock.MoveSpeed * 2
-		if MovebleBlock.MoveSpeed < 1
-			MovebleBlock.MoveSpeed = 1
-		endif
-		if MovebleBlock.MoveSpeed > 20
-			MovebleBlock.MoveSpeed = 20
+		if MovebleBlock.MoveSpeed < 1.0
+			MovebleBlock.MoveSpeed = 1.0
 		endif
 	endif
 
@@ -262,21 +268,38 @@ endfunction
 function MovebleBlockMoveDown(MovebleBlock ref as TMovebleBlock,Field ref as TField,Now as integer)
 	
 	local Value as integer
+	local Steps as integer
+	local i as integer
 	
+	Value = 0
+
 	if TimeGet(MovebleBlock.MoveTime,Now) > 0
+
+		Steps = MovebleBlock.MoveSpeed * MovebleBlock.MoveTime.CalcRange
 		
-		Value = MovebleBlock.MoveSpeed * MovebleBlock.MoveTime.CalcRange
+		for i = 1 to Steps
+			if MovebleBlockCollide(MovebleBlock,Field) = TRUE
+				exit
+			endif
 		
-		MovebleBlock.BoardPosition.y = MovebleBlock.BoardPosition.y + Value
+			MovebleBlock.BoardPosition.y = MovebleBlock.BoardPosition.y + 1
+			Value = Value + 1
 		
-		if MovebleBlock.BoardPosition.y > MovebleBlock.BasePosition.y + FIELDSIZE * 15 + 4
-			MovebleBlock.BoardPosition.y = MovebleBlock.BasePosition.y + FIELDSIZE * 15 + 4
+			MovebleBlock.FieldPosition.y = floor((MovebleBlock.BoardPosition.y - MovebleBlock.BasePosition.y - 4) / FIELDSIZE) - 1
+		
+			if MovebleBlock.FieldPosition.y > FIELD_MAX_Y
+				MovebleBlock.FieldPosition.y = FIELD_MAX_Y
+			endif
+		next i
+		
+		if MovebleBlock.BoardPosition.y > MovebleBlock.BasePosition.y + FIELDSIZE * FIELD_HEIGHT + 4
+			MovebleBlock.BoardPosition.y = MovebleBlock.BasePosition.y + FIELDSIZE * FIELD_HEIGHT + 4
 		endif
 		
 		MovebleBlock.FieldPosition.y = floor((MovebleBlock.BoardPosition.y - MovebleBlock.BasePosition.y - 4) / FIELDSIZE) -1
 		
-		if MovebleBlock.FieldPosition.y > Field.Array[0].Length
-			MovebleBlock.FieldPosition.y = Field.Array[0].Length
+		if MovebleBlock.FieldPosition.y > FIELD_MAX_Y
+			MovebleBlock.FieldPosition.y = FIELD_MAX_Y
 		endif
 		
 		MovebleBlockPositionRefresh(MovebleBlock)
@@ -317,16 +340,22 @@ endfunction
 //----------------------------------------------------------------------
 
 function MovebleBlockCollide(MovebleBlock ref as TMovebleBlock,Field ref as TField)
-	
+
 	local Value as integer
-	
+	local BottomY as integer
+
 	Value = FALSE
-	
-	if MovebleBlock.FieldPosition.y = Field.Array[0].Length
-		if MovebleBlock.BoardPosition.y = MovebleBlock.BasePosition.y + FIELDSIZE * 15 + 4
+	BottomY = MovebleBlock.BasePosition.y + FIELDSIZE * FIELD_HEIGHT + 4
+
+	// Unteres Spielfeldende erreicht oder ueberschritten.
+	if MovebleBlock.FieldPosition.y >= FIELD_MAX_Y
+		if MovebleBlock.BoardPosition.y >= BottomY
+			MovebleBlock.BoardPosition.y = BottomY
+			MovebleBlockPositionRefresh(MovebleBlock)
 			Value = TRUE
 		endif
 	else
+		// Nur innerhalb der gueltigen Feldgrenzen nach Kristallen suchen.
 		if MovebleBlock.FieldPosition.y >= -1
 			if Field.Array[MovebleBlock.FieldPosition.x,MovebleBlock.FieldPosition.y+1].ProtoCrystalIndex >= 0
 				MovebleBlock.BoardPosition.y = MovebleBlock.BasePosition.y + FIELDSIZE * (MovebleBlock.FieldPosition.y+1) + 4
@@ -335,7 +364,7 @@ function MovebleBlockCollide(MovebleBlock ref as TMovebleBlock,Field ref as TFie
 			endif
 		endif
 	endif
-	
+
 endfunction Value
 
 //----------------------------------------------------------------------

@@ -39,7 +39,7 @@ function TimeSet(Object ref as TTime,Span as integer,Range as float)
 	// time span to check for
 	Object.Span = Span
 	// multiply range per millisecs
-	Object.Multiplier = 1000/Span
+	Object.Multiplier = 1000.0/Span
 	// calculated Time check value
 	Object.Difference = 0
 	// target time per span
