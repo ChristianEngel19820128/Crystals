@@ -26,7 +26,13 @@ global PurpleTokenSend as TPurpleTokenSend
 
 function PurpleToken_Init()
 
-	PT_initialize('40e1f1dc7624289738d4a147dea1770a8d859ab2', 'pizza shakes')
+	local Key as string
+	local Password as string
+
+	Key = PurpleToken_GetKey()
+	Password = PurpleToken_GetPassword()
+
+	PT_initialize(Key,Password)
 
 endfunction
 
