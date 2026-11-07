@@ -1,4 +1,6 @@
 
+#constant MAX_SCORE 2147483647
+
 #constant FIELDSIZE 42
 
 #constant MOVE_TIMESPAN 10
@@ -236,7 +238,8 @@ type TGame
 	IsBlockMoving as integer
 	IsFieldExploding as integer
 	IsNewHighScore as integer
-	
+	IsMaxScore as integer
+
 	Background as TBackground
 	
 	ProtoCrystalList as TProtoCrystalList
@@ -324,8 +327,13 @@ type TGame
 	MenuSoundID as integer
 	MenuSelectSoundID as integer
 	ScoreSoundID as integer
-	
+	FinalSoundID as integer
+
 	TitleThemeID as integer
+
+	ScoreInstanceID as integer
+	ExplodeInstanceID as integer
+	LevelUpInstanceID as integer
 
 endtype
 

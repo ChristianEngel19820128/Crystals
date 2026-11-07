@@ -351,7 +351,7 @@ function GameInit(Game ref as TGame)
 	Game.HighScore.Table = Game.Difficulty
 	Game.HighScore.IsInit = TRUE
 	Game.HighScore.IsNew = TRUE
-	
+
 	Game.AbsoluteScore = 0
 	Game.CollectedScore = 0
 
@@ -383,6 +383,7 @@ function GameInit(Game ref as TGame)
 	Game.IsBlockMoving = FALSE
 	Game.IsFieldExploding = FALSE
 	Game.IsNewHighScore = FALSE
+	Game.IsMaxScore = FALSE
 	
 	ExplosionReset(Game.Explosion,Game.Time.VirtualNow)
 	
@@ -425,15 +426,18 @@ function GameDo(Game ref as TGame)
 	local ScoreCurve as float
 	local ScoreProgress as float
 	local ExplodeRate as float
+	local TempScore as float
+	local SafePoints as integer
 
 	if Game.IsRunning = TRUE
 		if Game.IsPause = FALSE
 
 			if Game.IsLost = TRUE
 				if Game.CollectedScore > 0
-					Game.AbsoluteScore = Game.AbsoluteScore + Game.CollectedScore
+					Game.AbsoluteScore = ScoreAddSafe(Game.AbsoluteScore,Game.CollectedScore)
 					Game.CollectedScore = 0
 				endif
+
 			endif
 
 			if Game.CollectedScore <> 0
@@ -463,10 +467,10 @@ function GameDo(Game ref as TGame)
 							ScoreAdd = Game.GuiCollectedScore
 						endif
 					
-						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + ScoreAdd
+						Game.GuiAbsoluteScore = ScoreAddSafe(Game.GuiAbsoluteScore,ScoreAdd)
 						Game.GuiCollectedScore = Game.GuiCollectedScore - ScoreAdd
 					else
-						Game.GuiAbsoluteScore = Game.GuiAbsoluteScore + Game.GuiCollectedScore
+						Game.GuiAbsoluteScore = ScoreAddSafe(Game.GuiAbsoluteScore,Game.GuiCollectedScore)
 						Game.GuiCollectedScore = 0
 					endif
 				endif
@@ -478,7 +482,7 @@ function GameDo(Game ref as TGame)
 					CountSteps = MovebleBlockMoveDown(Game.CurrentBlock,Game.Field,Game.Time.VirtualNow)
 					TimeReset(Game.CurrentBlock.SetUpTime,Game.Time.VirtualNow)
 					if Game.CurrentBlock.IsFast
-						Game.CollectedScore = Game.CollectedScore + Ceil(CountSteps/10)
+						Game.CollectedScore = ScoreAddSafe(Game.CollectedScore,Ceil(CountSteps/10))
 					endif
 				else
 					if MovebleBlockOutOfBounds(Game.CurrentBlock) = TRUE
@@ -535,7 +539,20 @@ function GameDo(Game ref as TGame)
 								GetRandomColor(Color)
 								SetTextColor(Game.TxtCollectedScore,Color.Red,Color.Green,Color.Blue,Color.Alpha)
 							endif
-							Game.CollectedScore = Game.CollectedScore * Game.Cascade + 0.1 * (GemCount*Game.Level)^2 * Game.Cascade
+
+							TempScore = Game.CollectedScore * 1.0 * Game.Cascade + 0.1 * (GemCount * 1.0 * Game.Level)^2 * Game.Cascade
+							
+							if TempScore >= MAX_SCORE
+								SafePoints = MAX_SCORE
+							else
+								if TempScore > 0
+									SafePoints = ceil(TempScore)
+								else
+									SafePoints = 0
+								endif
+							endif
+							
+							Game.CollectedScore = ScoreAddSafe(Game.CollectedScore,SafePoints)
 
 						else
 						
@@ -545,37 +562,49 @@ function GameDo(Game ref as TGame)
 								
 								Game.Cascade = 0
 
-								Game.AbsoluteScore = Game.AbsoluteScore + Game.CollectedScore
+								Game.AbsoluteScore = ScoreAddSafe(Game.AbsoluteScore,Game.CollectedScore)
 								Game.CollectedScore = 0
+
+								if Game.AbsoluteScore = MAX_SCORE
+									Game.IsRunning = FALSE
+									Game.IsLost = TRUE
+									Game.IsSummary = TRUE
+									Game.Summary.IsInit = TRUE
+									Game.HighScore.IsNew = TRUE
+									Game.IsMaxScore = TRUE
+									SoundPlay(Game.FinalSoundID,Game.SoundVol)
+								endif
 
 								SetTextColor(Game.TxtCascade,255,255,255,255)
 								SetTextColor(Game.TxtCollectedScore,255,255,255,255)
 								
-								If Game.NewLevel > Game.LastLevel
-									Rows = Floor(Game.NewLevel / 10.0) - Floor(Game.LastLevel / 10.0)
-									if Rows > 0
-										for i = 1 to ceil(1.0 * Game.NewLevel / 10)
-											if FieldLineCreateBottom(Game.Field,Game.ProtoCrystalList,Game.Difficulty) = FALSE
-												Game.IsRunning = FALSE
-												Game.IsLost = TRUE
-												Game.Summary.IsInit = TRUE
-												Game.HighScore.IsNew = TRUE
-											else
-												Game.LastLevel = Game.NewLevel
-											endif
-										next i
+								if Game.IsMaxScore = FALSE
+									If Game.NewLevel > Game.LastLevel
+										Rows = Floor(Game.NewLevel / 10.0) - Floor(Game.LastLevel / 10.0)
+										if Rows > 0
+											for i = 1 to ceil(1.0 * Game.NewLevel / 10)
+												if FieldLineCreateBottom(Game.Field,Game.ProtoCrystalList,Game.Difficulty) = FALSE
+													Game.IsRunning = FALSE
+													Game.IsLost = TRUE
+													Game.Summary.IsInit = TRUE
+													Game.HighScore.IsNew = TRUE
+												else
+													Game.LastLevel = Game.NewLevel
+												endif
+											next i
+										else
+											Game.LastLevel = Game.NewLevel
+										endif
 									else
-										Game.LastLevel = Game.NewLevel
-									endif
-								else
+										
+										Game.CurrentBlock.Block = Game.NextBlock
+										BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
+										MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
+										Game.IsBlockMoving = TRUE
+										Game.CurrentBlock.IsFast = FALSE
+										MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
 									
-									Game.CurrentBlock.Block = Game.NextBlock
-									BlockGenerate(Game.NextBlock,Game.ProtoCrystalList,Game.Difficulty,Game.Level)
-									MovebleBlockInit(Game.CurrentBlock,Game.Time.VirtualNow)
-									Game.IsBlockMoving = TRUE
-									Game.CurrentBlock.IsFast = FALSE
-									MovebleBlockSpeedSet(Game.CurrentBlock,Game.Level)
-								
+									endif
 								endif
 							
 						endif
@@ -615,6 +644,14 @@ function GameDo(Game ref as TGame)
 						Game.IsNewHighScore = TRUE
 					endif
 					Game.Summary.IsOnlineWaiting = FALSE
+				endif
+			endif
+
+			if Game.IsMaxScore = TRUE
+				if Game.Summary.IsInit = FALSE
+					if Game.Summary.IsOnlineWaiting = FALSE
+						SummarySelect(Game)
+					endif
 				endif
 			endif
 
@@ -890,5 +927,23 @@ endfunction
 //
 //----------------------------------------------------------------------
 
+function ScoreAddSafe(Score as integer,Points as integer)
 
+	if Score < 0
+		Score = 0
+	endif
+
+	if Points > 0
+		if Score >= MAX_SCORE - Points
+			Score = MAX_SCORE
+		else
+			Score = Score + Points
+		endif
+	endif
+
+endfunction Score
+	
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
 

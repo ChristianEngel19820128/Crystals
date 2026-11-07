@@ -119,6 +119,11 @@ repeat
 	HighScoreOnlineDo(Game.HighScore)
 	PurpleToken_SendDo()
 
+	if PurpleTokenSend.State = PURPLETOKEN_SEND_READY
+		HighScoreOnlineStart(Game.HighScore)
+		PurpleTokenSend.State = PURPLETOKEN_SEND_IDLE
+	endif
+
 settextstring(debug[0],"State"+str(PurpleTokenSend.State))
 settextstring(debug[1],"Time"+str(PurpleTokenSend.Time))
 settextstring(debug[2],"Result "+str(PurpleTokenSend.Result))

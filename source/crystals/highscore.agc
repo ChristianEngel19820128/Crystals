@@ -256,19 +256,19 @@ function HighScoreTableInsertName(Table ref as THighScore[],TableIndex as intege
 
 	if Value > -1
 
-		Table.Insert(NewScore,Value)
-		Table.Remove(Table.Length)
-
 		if TableIndex = TABLEONLINE
 			HighScoreOnlineSendScore(NewScore.Name,NewScore.Score)
-		endif
+		else
+			Table.Insert(NewScore,Value)
+			Table.Remove(Table.Length)
 
-		if Device$ = "windows"
-			HighScoreTableSave(Table,TableIndex,TRUE)
-		endif
+			if Device$ = "windows"
+				HighScoreTableSave(Table,TableIndex,TRUE)
+			endif
 
-		if Device$ = "html5"
-			HighScoreTableSaveAsCookie(Table,TableIndex,TRUE)
+			if Device$ = "html5"
+				HighScoreTableSaveAsCookie(Table,TableIndex,TRUE)
+			endif
 		endif
 
 	endif
@@ -279,9 +279,13 @@ endfunction Value
 //
 //----------------------------------------------------------------------
 
-function HighScoreInsertName(HighScoreList ref as THighScoreList,Summary ref as TSummary)
+function HighScoreInsertName(HighScoreList ref as THighScoreList,Summary ref as TSummary,IsMaxScore as integer)
 	
-	SummaryHighscoreSetName(Summary)
+	if IsMaxScore = TRUE
+		Summary.HighScore.Name = "BYTE"
+	else
+		SummaryHighscoreSetName(Summary)
+	endif
 	
 	SummaryHighscoreSetScore(Summary,Summary.Difficulty)
 	if HighScoreTableInsertName(HighScoreList.Score[Summary.Difficulty],Summary.Difficulty,Summary.HighScore) > -1

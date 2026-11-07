@@ -57,6 +57,12 @@ function SoundInit(Game ref as TGame)
 		Game.ScoreSoundID = LoadSound(File.Name)
 	endif
 
+	File.Name = "sndfinal.wav"
+	
+	if FilePathSetAndCheck(File)
+		Game.FinalSoundID = LoadSound(File.Name)
+	endif
+
 	File.Name = "hello2.ogg"
 	
 	if FilePathSetAndCheck(File)

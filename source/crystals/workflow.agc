@@ -180,9 +180,11 @@ endfunction
 
 function SummarySelect(Game ref as TGame)
 
-	SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
+	if Game.IsMaxScore = FALSE
+		SoundPlay(Game.MenuSelectSoundID,Game.SoundVol)
+	endif
 	if Game.IsNewHighScore = TRUE
-		HighScoreInsertName(Game.HighScore,Game.Summary)
+		HighScoreInsertName(Game.HighScore,Game.Summary,Game.IsMaxScore)
 	endif
 	Game.IsRunning = FALSE
 	Game.IsPause = FALSE
@@ -193,6 +195,7 @@ function SummarySelect(Game ref as TGame)
 	Game.IsBlockMoving = FALSE
 	Game.IsFieldExploding = FALSE
 	Game.IsNewHighScore = FALSE
+	Game.IsMaxScore = FALSE
 
 endfunction
 
