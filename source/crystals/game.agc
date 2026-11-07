@@ -582,7 +582,7 @@ function GameDo(Game ref as TGame)
 									If Game.NewLevel > Game.LastLevel
 										Rows = Floor(Game.NewLevel / 10.0) - Floor(Game.LastLevel / 10.0)
 										if Rows > 0
-											for i = 1 to ceil(1.0 * Game.NewLevel / 10)
+											for i = 1 to Rows
 												if FieldLineCreateBottom(Game.Field,Game.ProtoCrystalList,Game.Difficulty) = FALSE
 													Game.IsRunning = FALSE
 													Game.IsLost = TRUE
