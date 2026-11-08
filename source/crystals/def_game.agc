@@ -141,6 +141,7 @@ type TMovebleBlock
 	MoveRange as float
 	SetUpTime as TTime
 	IsFast as integer
+	MoveRemainder as float
 	
 endtype
 

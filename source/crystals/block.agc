@@ -149,6 +149,7 @@ function MovebleBlockInit(MovebleBlock ref as TMovebleBlock,Now as integer,Level
 	
 	MovebleBlock.IsFast = FALSE
 	MovebleBlockSpeedSet(MovebleBlock,Level)
+	MovebleBlock.MoveRemainder = 0.0
 	
 endfunction
 
@@ -251,7 +252,7 @@ function MovebleBlockSpeedSet(MovebleBlock ref as TMovebleBlock,Level as integer
 	endif
 
 	MovebleBlock.MoveSpeed = 0.025 + Floor(BaseLevel/10.0)*0.01 + mod(Level,10)*0.025
-	
+
 	if MovebleBlock.IsFast = TRUE
 		MovebleBlock.MoveSpeed = MovebleBlock.MoveSpeed * 2
 		if MovebleBlock.MoveSpeed < 1.0
@@ -275,7 +276,9 @@ function MovebleBlockMoveDown(MovebleBlock ref as TMovebleBlock,Field ref as TFi
 
 	if TimeGet(MovebleBlock.MoveTime,Now) > 0
 
-		Steps = MovebleBlock.MoveSpeed * MovebleBlock.MoveTime.CalcRange
+		MovebleBlock.MoveRemainder = MovebleBlock.MoveRemainder + MovebleBlock.MoveSpeed * MovebleBlock.MoveTime.CalcRange
+		Steps = floor(MovebleBlock.MoveRemainder)
+		MovebleBlock.MoveRemainder = MovebleBlock.MoveRemainder - Steps
 		
 		for i = 1 to Steps
 			if MovebleBlockCollide(MovebleBlock,Field) = TRUE
