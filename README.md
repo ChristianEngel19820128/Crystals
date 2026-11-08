@@ -1,6 +1,6 @@
-# Crystals
+# Crystal Columns
 
-A puzzle game written in AppGameKit Studio.
+A falling-block puzzle game written in AppGameKit Studio.
 
 Imagine yourself in the ancient world of Phoenician merchants, playing a mysterious game of colorful gems.
 
@@ -10,17 +10,13 @@ Centuries later, the classic puzzle game *Columns* found its way onto arcade mac
 
 # Version
 
-The current version is 0.9997.
-
-# License
-
-The code is released under the Unlicense. You can use, modify, and distribute it freely. Sound and music created by third parties are not covered by this license.
+The current version is **1.0**.
 
 # Release
 
-Version 1.0 is planned for release on itch.io as an HTML5 game playable in your browser and as a Windows download.
+Crystal Columns V1.0 is released on itch.io as an HTML5 game playable in your browser. A Windows ZIP build is also prepared for release.
 
-# Link to HTML5
+# Play Online
 
 https://somebasics.itch.io/crystal-columns
 
@@ -34,17 +30,16 @@ Every ten levels, a row of random crystals rises from the bottom. In addition to
 
 # Difficulty & Highscores
 
-On Ultra difficulty, you can submit your score to an online leaderboard. If no network connection is available, the connection attempt times out after three seconds. Online submissions currently use a test leaderboard.
+There are five difficulty levels, from Easy to Ultra. On Ultra difficulty, you can submit your score to the online leaderboard. An internet connection is required for online submissions; if no connection is available, the connection attempt times out after three seconds.
 
-Each difficulty level has its own local highscore table. In the HTML5 version, scores are stored as cookies. On Windows, you can find them under AppData/Local if you want to edit them.
+Each difficulty level has its own local highscore table. In the HTML5 version, scores are stored using browser cookies. On Windows, local score data can be found under AppData/Local.
 
 There are also three additional achievement leaderboards that track gems, levels, and cascades.
 
 # Keyboard Controls
 
 - Enter - Confirm menu selection
-- Back - Go back in menus
-- Esc - End game
+- Esc - Go back in menus / End game
 - A/D or Left/Right - Move block
 - W or Up - Shuffle block upward
 - S or Down - Drop block
@@ -62,26 +57,37 @@ Connect your controller before starting the game; otherwise, controller input wi
 
 # Sound & Music
 
-Sound effects are included. Music is currently disabled until suitable music files are available.
+Sound effects are included for gameplay, menus, scoring, and special events. The background music is a demo track from the *SnakeSnacker* example project included with AppGameKit Studio.
 
 While the game is paused, you can adjust the sound and music volume for the current session.
 
-Sound effect files:
+# Credits
 
-- sndnextlvl.wav
-- sndexplode.wav
-- sndblockfall.wav
-- sndblockdrop.wav
-- sndshuffle.wav
-- sndmenu.wav
-- sndmenuselect.wav
-- sndscore.wav
+**SomeBasics**
 
-Planned music format:
+- Game design and development
+- Programming (AppGameKit Studio)
+- Graphics and visual design
+- Gameplay, testing, and balancing
 
-- `*.ogg`
+**BYTE (AI assistant, powered by OpenAI)**
+
+- Code review and bug research
+- Debugging assistance
+- Audio polish and sound processing
+- Development support
+
+**Third-party audio**
+
+- Background music: Demo track from the *SnakeSnacker* example project included with AppGameKit Studio. Original composer and licensing terms have not been confirmed.
+
+# License
+
+The game source code is released under the **Unlicense**. You can use, modify, and distribute the source code freely. Third-party sound and music assets are not covered by this license.
+
+**Note:** Crediting the *SnakeSnacker* demo track identifies its source but does not establish permission to redistribute it. Its license should be verified separately.
 
 # Planned Features
 
 - Add touch controls for mobile devices.
-- Add two theme music tracks.
+- Add original background music tracks.
