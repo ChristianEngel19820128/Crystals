@@ -5,6 +5,7 @@
 
 #include "pt/purpletoken.agc"
 #include "pt/pt_interface.agc"
+#include "pt/pt_key.agc"
 
 //----------------------------------------------------------------------
 //

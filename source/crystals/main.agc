@@ -7,7 +7,7 @@
 SetErrorMode(2)
 
 // set window properties
-SetWindowTitle("Cystals")
+SetWindowTitle("Crystal Columns")
 
 local dx as integer
 local dy as integer
